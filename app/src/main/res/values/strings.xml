@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ForwarApplication</string>
+    <string name="ed_ps">请输入密码</string>
+    <string name="ed_code">请输入验证码</string>
+    <string name="query">查询</string>
+    <string name="className">课程名称</string>
+    <string name="ClassScore">课程成绩</string>
+    <string name="stuNo">请输入学号</string>
+</resources>
