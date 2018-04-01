@@ -53,6 +53,7 @@ public class ChoiseActivity extends AppCompatActivity {
      * @param view 视图
      */
     public void toTable(View view) {
+        //跳转到另外一个Intent
         mIntent = new Intent(ChoiseActivity.this, TimeTableActivity.class);
         startActivity(mIntent);
     }
