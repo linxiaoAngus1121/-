@@ -33,12 +33,24 @@ public class ChoiseActivity extends AppCompatActivity {
                         break;
                     default:
                         break;
+
                 }
-                startActivity(mIntent);
+
+                if (mIntent != null) {
+                    startActivity(mIntent);
+                }
             }
         });
+
         initAdapter();
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mIntent = null;
+    }
+
 
     private void initAdapter() {
 

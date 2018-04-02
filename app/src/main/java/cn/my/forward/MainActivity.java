@@ -106,7 +106,8 @@ public class MainActivity extends BaseActivity implements ILoginView, View
 
     @Override
     public void showLoginError() {
-        mtv.setText("登录失败");
+        Toast.makeText(this, "登录失败", Toast.LENGTH_SHORT).show();
+        //mtv.setText("登录失败");
     }
 
     @Override

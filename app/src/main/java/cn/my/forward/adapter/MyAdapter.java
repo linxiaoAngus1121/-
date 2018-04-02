@@ -15,6 +15,7 @@ import cn.my.forward.R;
 
 /**
  * Created by 123456 on 2018/3/19.
+ * 主页的adapter
  */
 
 public class MyAdapter extends BaseAdapter {

@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -22,12 +24,15 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
     private SourcePresenter presenter = new SourcePresenter(this);
 
+    private ProgressBar bar;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scorequery);
         mtv = (TextView) findViewById(R.id.scoure_show);
         mLayout = (TableLayout) findViewById(R.id.table);
+        bar = (ProgressBar) findViewById(R.id.scpure_bar);
         presenter.scoureQuery();
     }
 
@@ -49,17 +54,17 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
     @Override
     public void showSource(ArrayList<Bean_s> list) {
+        bar.setVisibility(View.GONE);
         if (list.size() == 0) {
-            mtv.setText("查询成绩出错");
+            this.showCodeError("错误");
             return;
         }
-        mtv.setText("查询成绩成功");
-
-
         for (int i = 0; i < list.size(); i++) {     //数据源
             TableRow tableRow = new TableRow(getApplicationContext());
             TextView textView = new TextView(getApplicationContext());
             TextView textView01 = new TextView(getApplicationContext());
+            textView.setTextColor(getResources().getColor(R.color.colorWhile));
+            textView01.setTextColor(getResources().getColor(R.color.colorWhile));
             textView01.setGravity(Gravity.CENTER_HORIZONTAL);
             textView.setText(list.get(i).getClassName());
             textView01.setText(list.get(i).getScore());
@@ -69,14 +74,13 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
         }
 
-        mtv.setText("课表查询成功");
-
 
     }
 
     @Override
     public void showSourceError(String s) {
-        //  mtv.setText(String.format("课表查询失败%s", s));
+        bar.setVisibility(View.GONE);
+        mtv.setText(String.format("课表查询失败%s", s));
     }
 
     @Override

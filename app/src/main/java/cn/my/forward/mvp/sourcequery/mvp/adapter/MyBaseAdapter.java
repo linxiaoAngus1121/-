@@ -14,6 +14,7 @@ import cn.my.forward.R;
 
 /**
  * Created by 123456 on 2018/3/5.
+ * 课表的adapter
  */
 
 public class MyBaseAdapter extends BaseAdapter {
