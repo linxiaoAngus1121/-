@@ -100,6 +100,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     public void showLoginSuccess() {
         mtv.setText("登录成功");
         Intent intent = new Intent(MainActivity.this, ChoiseActivity.class);
+        intent.putExtra("stu_no", this.getstudNo());
         startActivity(intent);
         finish();
     }

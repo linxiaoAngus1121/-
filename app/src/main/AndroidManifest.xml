@@ -26,6 +26,8 @@
         </activity>
         <activity android:name=".ChoiseActivity">
         </activity>
+        <activity android:name=".ExamActivity">
+        </activity>
     </application>
 
 </manifest>

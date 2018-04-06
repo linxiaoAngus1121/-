@@ -31,9 +31,13 @@ public class ChoiseActivity extends AppCompatActivity {
                     case 1:
                         mIntent = new Intent(ChoiseActivity.this, TimeTableActivity.class);
                         break;
+                    case 2:
+                        mIntent = new Intent(ChoiseActivity.this, ExamActivity.class);
+                        String stuNo = getIntent().getStringExtra("stu_no");
+                        mIntent.putExtra("stu_no", stuNo);
+                        break;
                     default:
                         break;
-
                 }
 
                 if (mIntent != null) {
@@ -53,30 +57,8 @@ public class ChoiseActivity extends AppCompatActivity {
 
 
     private void initAdapter() {
-
         MyAdapter adapter = new MyAdapter(ChoiseActivity.this);
         mGridView.setAdapter(adapter);
     }
 
-
-    /**
-     * 课表查询
-     *
-     * @param view 视图
-     */
-    public void toTable(View view) {
-        //跳转到另外一个Intent
-        mIntent = new Intent(ChoiseActivity.this, TimeTableActivity.class);
-        startActivity(mIntent);
-    }
-
-    /**
-     * 成绩查询
-     *
-     * @param view 视图
-     */
-    public void toScore(View view) {
-        mIntent = new Intent(ChoiseActivity.this, SourceQueryActivity.class);
-        startActivity(mIntent);
-    }
 }

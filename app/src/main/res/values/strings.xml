@@ -6,4 +6,16 @@
     <string name="className">课程名称</string>
     <string name="ClassScore">课程成绩</string>
     <string name="stuNo">请输入学号</string>
+    <string name="exam_time">考试时间</string>
+    <string name="exam_subject">考试科目</string>
+    <string name="exam_address">考试地点</string>
+
+    <string-array name="exam_time">
+        <item>2017–2018–02</item>
+        <item>2017–2018–01</item>
+        <item>2016–2017–02</item>
+        <item>2016–2017–01</item>
+        <item>2015–2016–02</item>
+        <item>2015–2016–01</item>
+    </string-array>
 </resources>

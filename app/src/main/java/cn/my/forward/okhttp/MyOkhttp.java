@@ -1,6 +1,9 @@
 package cn.my.forward.okhttp;
 
 
+import android.util.Log;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
@@ -11,11 +14,14 @@ import okhttp3.Request;
 
 /**
  * Created by 123456 on 2018/2/10.
+ * 请求工具封装
  */
 
 public class MyOkhttp {
     private static MyOkhttp instance;
     private OkHttpClient client;
+    private static Map<String, String> map = new HashMap<>();
+
 
     public static MyOkhttp getInstance() {
         if (instance == null) {
@@ -83,6 +89,26 @@ public class MyOkhttp {
         client.newCall(request).enqueue(callback);
     }
 
+    public void PostExamRequest(String url, String view, String[] s, Map<String, String> map,
+                                Callback
+                                        callback) {
+        Request request = ExamPostRequest(url, view, s, map);
+        client.newCall(request).enqueue(callback);
+    }
+
+
+    private Request ExamPostRequest(String url, String sub, String[] s, Map<String, String> map) {
+        FormBody formBody = buildBodyExam(sub, s);
+        Request.Builder request = new Request.Builder().post(formBody).url(url);
+        for (Map.Entry<String, String> stringStringEntry : map.entrySet()) {
+            Map.Entry element = (Map.Entry) stringStringEntry;
+            String strKey = (String) element.getKey();
+            String strObj = (String) element.getValue();
+            request.header(strKey, strObj);
+        }
+        return request.build();
+    }
+
     /**
      * 构建request对想
      *
@@ -118,10 +144,12 @@ public class MyOkhttp {
             Map.Entry element = (Map.Entry) stringStringEntry;
             String strKey = (String) element.getKey();
             String strObj = (String) element.getValue();
+
             post.header(strKey, strObj);
         }
         return post.build();
     }
+
 
     /**
      * 构建登录需要传入的参数
@@ -165,6 +193,23 @@ public class MyOkhttp {
 
 
     /**
+     * @param viewstate viewstate状态
+     * @return 构建的body
+     */
+
+    private FormBody buildBodyExam(String viewstate, String[] s) {
+        Log.i("000", s[0] + "这是s0");
+        Log.i("000", s[1] + "这是s1");
+        return new FormBody.Builder()
+                .add("__EVENTTARGET", "xnd")
+                .add("__EVENTARGUMENT", "")
+                .add("__VIEWSTATE", viewstate)
+                .add("xnd", s[0])
+                .add("xqd", s[1])
+                .build();
+    }
+
+    /**
      * 不带参数的构建
      *
      * @param url url地址
@@ -190,6 +235,9 @@ public class MyOkhttp {
             Map.Entry element = (Map.Entry) stringStringEntry;
             String strKey = (String) element.getKey();
             String strObj = (String) element.getValue();
+            if (strKey.equals("Cookie")) {
+                map.put(strKey, strObj);
+            }
             builder.header(strKey, strObj);
         }
         return builder.build();

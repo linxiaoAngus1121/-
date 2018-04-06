@@ -11,6 +11,8 @@ public class Bean_l {
     private String viewState;
     private String cookies;
     private String code;//验证码
+    private String examState;
+
 
     public Bean_l(String stuNo, String stuPs, String viewState, String cookies, String code) {
         this.stuNo = stuNo;
@@ -18,6 +20,14 @@ public class Bean_l {
         this.viewState = viewState;
         this.cookies = cookies;
         this.code = code;
+    }
+
+    public String getExamState() {
+        return examState;
+    }
+
+    public void setExamState(String examState) {
+        this.examState = examState;
     }
 
     public String getCode() {

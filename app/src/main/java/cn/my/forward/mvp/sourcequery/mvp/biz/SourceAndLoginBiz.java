@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
+import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.okhttp.MyOkhttp;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -38,6 +40,9 @@ public class SourceAndLoginBiz implements ILogin {
     private ArrayList<Bean_s> list = new ArrayList<>();     //存放成绩的list
     private Bean_l bean;
     private static SourceAndLoginBiz mInstance;
+    private String viewState;
+    private boolean flag = true;
+
 
     private SourceAndLoginBiz() {
 
@@ -77,6 +82,161 @@ public class SourceAndLoginBiz implements ILogin {
     @Override
     public void timeTable(ITimeTableListener listener) {
         toTimeQuery(bean, stuName, listener);
+    }
+
+
+    @Override
+    public void examQuery(String postion, IExamListener listener) {
+        StringBuilder builder = new StringBuilder(postion);
+        String[] s = new String[5];
+        int indexOf = builder.lastIndexOf("-");
+        s[0] = builder.substring(0, indexOf);//年
+        s[1] = builder.substring(indexOf + 1);//学期
+        toExam(listener, s);
+    }
+
+    /**
+     * 考试查询
+     *
+     * @param listener 监听器
+     * @param s        数组保存所有数据
+     */
+    private void toExam(final IExamListener listener, String[] s) {
+        final String url = "http://jwxt.sontan.net/xskscx" + ".aspx?xh=" + bean.getStuNo() +
+                "&xm=" +
+                stuName + "&gnmkdm=N121604";
+        Map<String, String> map = new HashMap<>();
+        map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;" +
+                "q=0.8");
+        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        map.put("Connection", "keep-alive");
+        map.put("Cookie", bean.getCookies());
+        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
+        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
+                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+
+
+        instance.PostExamRequest(url, viewState, s, map, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i("000", e.toString());
+                listener.showExamError("嗷了个嗷，出错了");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                castExamState(response.body().byteStream(), url, listener);
+
+            }
+        });
+    }
+
+
+    /**
+     * 获取考试查询页面上的viewstate
+     *
+     * @param inputStream 输入流
+     * @param url         url地址
+     * @param listener    回调监听
+     */
+    private void castExamState(InputStream inputStream, String url, IExamListener listener) {
+        if (inputStream == null) {
+            return;
+        }
+        Document document = null;
+        try {
+            document = Jsoup.parse(inputStream, "gb2312", url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Log.i("000", flag + "是+++++");
+      //  if (flag) {
+            //第一次进入
+            if (document != null) {
+                Elements elements = document.select("input");   //第一次进入是为了获取viewstate，同时判断是否需要查询数据
+                //获取出第三个input标签
+                Element element = elements.get(2);
+                viewState = element.attr("value");
+                //  getdata(document, listener);
+            }
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+       // }
+        getdata(document, listener);
+       // flag = false;
+    }
+
+    /**
+     * 进行考试查询页面数据的截取
+     *
+     * @param document 文档对象
+     * @param listener 回调监听
+     */
+    private void getdata(Document document, IExamListener listener) {
+        if (document != null) {
+            //这里需要再一次判断，第一次有没有数据，没有签的话没有只有一个<tr>标签，直接return 回去
+            boolean b = isfirstHasData(document);
+            if (b) {
+                Log.i("000", "有数据");
+            } else {
+                Log.i("000", "没数据");
+            }
+            if (b) {
+                //进行数据解析
+                pastExamData(document, listener);
+            }
+
+        }
+    }
+
+    /**
+     * 解析考试查询数据
+     *
+     * @param document 文档对象
+     * @param listener 回调监听
+     */
+    private void pastExamData(Document document, IExamListener listener) {
+        //语法含义：找出table 下所有tr标签除了class为datelisthead
+        Elements elements = document.select("table tr:not(.datelisthead)");
+        castExamData(listener, elements, elements.size());
+    }
+
+
+    /**
+     * 对考试的信息进行解析返回给activity
+     *
+     * @param listener 回调监听
+     * @param elements 文档对象
+     * @param size     数据集合大小
+     */
+    private void castExamData(IExamListener listener, Elements elements, int size) {
+        int i = 0;
+        List<ExamBean> list = new ArrayList<>();
+        while (i < size) {
+            Elements select = elements.get(i).select("td");
+            String s = "".equals(select.get(6).text()) ? "" : " " + select.get(6).text() + "号";
+            ExamBean bean = new ExamBean(select.get(1).text(), select.get(3).text(), select.get
+                    (4).text() + s);
+            list.add(bean);
+            i++;
+        }
+        listener.showExamSuccess(list);
+
+    }
+
+    /**
+     * 判断第一次是否有数据
+     *
+     * @param document 文档对象
+     * @return true 有数据 false 没有数据
+     */
+    private boolean isfirstHasData(Document document) {
+        return document.select("tr").size() > 1;
     }
 
 
@@ -123,6 +283,7 @@ public class SourceAndLoginBiz implements ILogin {
                     String substring = string.substring(2282, 2302);
                     Log.i("000", substring + "截取后的__VIEWSTATE");
                     bean.setViewState(substring);
+                    viewState = substring;
                     getpic(bean, listener);
                 }
             }
@@ -367,7 +528,7 @@ public class SourceAndLoginBiz implements ILogin {
     /**
      * 把inputstream转成string类型的数据并返回
      *
-     * @param inputStream
+     * @param inputStream 源inputstream
      * @return string 返回的string
      */
     private String streamtoString(InputStream inputStream) {
@@ -497,6 +658,7 @@ public class SourceAndLoginBiz implements ILogin {
             }
         });
     }
+
 
     /**
      * 最终裁剪数据
