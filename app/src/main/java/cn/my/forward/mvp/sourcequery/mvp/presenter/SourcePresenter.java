@@ -11,14 +11,17 @@ import java.util.List;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
+import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IExamListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IGetCodeListtener;
+import cn.my.forward.mvp.sourcequery.mvp.biz.ILevelListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.ILogin;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IOnLoginListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IOnQuerySourceListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.ITimeTableListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.SourceAndLoginBiz;
 import cn.my.forward.mvp.sourcequery.mvp.view.IExamView;
+import cn.my.forward.mvp.sourcequery.mvp.view.ILevealView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ITimeTableView;
 
@@ -32,6 +35,7 @@ public class SourcePresenter {
     private ISourceView view;
     private ITimeTableView mTableView;
     private IExamView mExamView;
+    private ILevealView mLevel;
     private Bean_l bean01;
     private Handler mhalder = new Handler(Looper.getMainLooper());  //让handler运行在主线程中
 
@@ -43,6 +47,8 @@ public class SourcePresenter {
             this.view = (ISourceView) view;
         } else if (view instanceof IExamView) {
             this.mExamView = (IExamView) view;
+        } else if (view instanceof ILevealView) {
+            mLevel = (ILevealView) view;
         } else {
             try {
                 throw new Exception("大哥，你错了");
@@ -50,6 +56,30 @@ public class SourcePresenter {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void LevelQuery() {
+        sourceQuery.levelQuery(new ILevelListener() {
+            @Override
+            public void showResultSucceed(final ArrayList<LevelBean> been) {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLevel.showLevelData(been);
+                    }
+                });
+            }
+
+            @Override
+            public void showResultError(final String s) {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLevel.showLevelDataError(s);
+                    }
+                });
+            }
+        });
     }
 
 

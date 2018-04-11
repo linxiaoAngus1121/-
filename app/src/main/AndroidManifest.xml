@@ -28,6 +28,8 @@
         </activity>
         <activity android:name=".ExamActivity">
         </activity>
+        <activity android:name=".LevelActivity">
+        </activity>
     </application>
 
 </manifest>

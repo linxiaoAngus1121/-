@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
+import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.okhttp.MyOkhttp;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -95,6 +96,76 @@ public class SourceAndLoginBiz implements ILogin {
         toExam(listener, s);
     }
 
+    @Override
+    public void levelQuery(final ILevelListener listener) {
+        final String url = "http://jwxt.sontan.net/xsdjkscx.aspx?xh=" + bean.getStuNo() + "&xm=" +
+                stuName + "&gnmkdm=N121606";
+        Log.i("000", url);
+        Map<String, String> map = new HashMap<>();
+        map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;" +
+                "q=0.8");
+        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        map.put("Connection", "keep-alive");
+        map.put("Cookie", bean.getCookies());
+        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
+        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
+                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+
+        instance.GetRequest(url, map, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.showResultError("嗷了个嗷~~跑偏了");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                //   listener.showResultSucceed();
+                if (response.body().byteStream() == null) {
+                    listener.showResultError("嗷了个嗷~~跑偏了");
+                    return;
+                }
+                getLevelData(response.body().byteStream(), url, listener);
+            }
+        });
+    }
+
+    /**
+     * 截取等级考试的html
+     *
+     * @param inputStream 输入流
+     * @param url         baseurl
+     * @param listener    回调监听
+     */
+    private void getLevelData(InputStream inputStream, String url, ILevelListener listener) {
+        if (inputStream == null || url == null) {
+            return;
+        }
+
+        try {
+            Document document = Jsoup.parse(inputStream, "gb2312", url);
+            Elements table = document.select("table tr:not(.datelisthead)");
+            ArrayList<LevelBean> been = new ArrayList<>();
+            Log.i("000", table.size() + "");
+            for (Element the : table) {
+                Elements td = the.select("td");
+                LevelBean bean = new LevelBean(td.get(2).text() + "      ", td.get(3).text(), td.get
+                        (5).text
+                        ());
+                been.add(bean);
+            }
+            listener.showResultSucceed(been);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * 考试查询
      *
@@ -152,23 +223,23 @@ public class SourceAndLoginBiz implements ILogin {
         }
 
         Log.i("000", flag + "是+++++");
-      //  if (flag) {
-            //第一次进入
-            if (document != null) {
-                Elements elements = document.select("input");   //第一次进入是为了获取viewstate，同时判断是否需要查询数据
-                //获取出第三个input标签
-                Element element = elements.get(2);
-                viewState = element.attr("value");
-                //  getdata(document, listener);
-            }
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-       // }
+        //  if (flag) {
+        //第一次进入
+        if (document != null) {
+            Elements elements = document.select("input");   //第一次进入是为了获取viewstate，同时判断是否需要查询数据
+            //获取出第三个input标签
+            Element element = elements.get(2);
+            viewState = element.attr("value");
+            //  getdata(document, listener);
+        }
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // }
         getdata(document, listener);
-       // flag = false;
+        // flag = false;
     }
 
     /**
@@ -180,17 +251,10 @@ public class SourceAndLoginBiz implements ILogin {
     private void getdata(Document document, IExamListener listener) {
         if (document != null) {
             //这里需要再一次判断，第一次有没有数据，没有签的话没有只有一个<tr>标签，直接return 回去
-            boolean b = isfirstHasData(document);
-            if (b) {
-                Log.i("000", "有数据");
-            } else {
-                Log.i("000", "没数据");
-            }
-            if (b) {
+            if (isfirstHasData(document)) {
                 //进行数据解析
                 pastExamData(document, listener);
             }
-
         }
     }
 

@@ -9,6 +9,9 @@
     <string name="exam_time">考试时间</string>
     <string name="exam_subject">考试科目</string>
     <string name="exam_address">考试地点</string>
+    <string name="level">级别</string>
+    <string name="level_admissionTicket">准考证</string>
+    <string name="level_grade">成绩</string>
 
     <string-array name="exam_time">
         <item>2017–2018–02</item>

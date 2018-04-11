@@ -3,7 +3,6 @@ package cn.my.forward.okhttp;
 
 import android.util.Log;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
@@ -20,7 +19,6 @@ import okhttp3.Request;
 public class MyOkhttp {
     private static MyOkhttp instance;
     private OkHttpClient client;
-    private static Map<String, String> map = new HashMap<>();
 
 
     public static MyOkhttp getInstance() {
@@ -97,6 +95,15 @@ public class MyOkhttp {
     }
 
 
+    /**
+     * 构建exam的Request
+     *
+     * @param url 请求的路径
+     * @param sub viewstate
+     * @param s   包含请求的学期还有学期
+     * @param map 请求头
+     * @return 返回构建的request
+     */
     private Request ExamPostRequest(String url, String sub, String[] s, Map<String, String> map) {
         FormBody formBody = buildBodyExam(sub, s);
         Request.Builder request = new Request.Builder().post(formBody).url(url);
@@ -235,9 +242,6 @@ public class MyOkhttp {
             Map.Entry element = (Map.Entry) stringStringEntry;
             String strKey = (String) element.getKey();
             String strObj = (String) element.getValue();
-            if (strKey.equals("Cookie")) {
-                map.put(strKey, strObj);
-            }
             builder.header(strKey, strObj);
         }
         return builder.build();

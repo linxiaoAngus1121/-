@@ -94,7 +94,7 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
             this.showError("嗷了个嗷，出错了");
             return;
         }
-        Toast.makeText(this, "查询正确" + list.size(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "查询成功" + list.size(), Toast.LENGTH_SHORT).show();
         MyRecycleViewAdapter adapter = new MyRecycleViewAdapter(this, list);
         mRv.setAdapter(adapter);
     }

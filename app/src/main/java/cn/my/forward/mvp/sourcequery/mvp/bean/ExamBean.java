@@ -2,6 +2,7 @@ package cn.my.forward.mvp.sourcequery.mvp.bean;
 
 /**
  * Created by 123456 on 2018/4/3.
+ * Exam的实体类
  */
 
 public class ExamBean {

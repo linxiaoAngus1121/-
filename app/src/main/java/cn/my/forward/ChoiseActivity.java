@@ -36,6 +36,9 @@ public class ChoiseActivity extends AppCompatActivity {
                         String stuNo = getIntent().getStringExtra("stu_no");
                         mIntent.putExtra("stu_no", stuNo);
                         break;
+                    case 3:
+                        mIntent = new Intent(ChoiseActivity.this, LevelActivity.class);
+                        break;
                     default:
                         break;
                 }
