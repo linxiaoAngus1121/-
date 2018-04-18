@@ -11,7 +11,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.InputStream;
@@ -27,7 +26,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     private EditText mEditnum;  //学号
     private EditText mEditPass; //密码
     private ImageView miv;
-    private TextView mtv;
+    private Button mButton;
     private SourcePresenter presenter = new SourcePresenter(this);
 
     @Override
@@ -41,11 +40,10 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll()
                 .build();
         StrictMode.setThreadPolicy(policy);
-        mtv = (TextView) findViewById(R.id.show);
         mEditnum = (EditText) findViewById(R.id.ed_num);
         mEditPass = (EditText) findViewById(R.id.edit_password);
         miv = (ImageView) findViewById(R.id.showCode);
-        Button mButton = (Button) findViewById(R.id.finalto);
+        mButton = (Button) findViewById(R.id.finalto);
         editText = (EditText) findViewById(R.id.edit_ps);
         miv.setOnClickListener(this);
         mButton.setOnClickListener(this);
@@ -98,7 +96,6 @@ public class MainActivity extends BaseActivity implements ILoginView, View
 
     @Override
     public void showLoginSuccess() {
-        mtv.setText("登录成功");
         Intent intent = new Intent(MainActivity.this, ChoiseActivity.class);
         intent.putExtra("stu_no", this.getstudNo());
         startActivity(intent);
@@ -108,7 +105,8 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     @Override
     public void showLoginError() {
         Toast.makeText(this, "登录失败", Toast.LENGTH_SHORT).show();
-        //mtv.setText("登录失败");
+        mButton.setText("登陆");
+        mButton.setClickable(true);
     }
 
     @Override
@@ -125,6 +123,8 @@ public class MainActivity extends BaseActivity implements ILoginView, View
 
             case R.id.finalto:  //登录按钮
                 presenter.login();
+                mButton.setText("正在登陆");
+                mButton.setClickable(false);
                 break;
 
             default:

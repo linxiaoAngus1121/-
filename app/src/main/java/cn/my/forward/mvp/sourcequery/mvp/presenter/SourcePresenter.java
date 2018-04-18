@@ -209,10 +209,11 @@ public class SourcePresenter {
         });
     }
 
-    public void timetable() {
-        sourceQuery.timeTable(new ITimeTableListener() {
+    public void timetable(int start) {
+
+        sourceQuery.timeTable(start,new ITimeTableListener() {
             @Override
-            public void QueryTimeTableSuccess(final List<String> nodes) {
+            public void QueryTimeTableSuccess(final List nodes) {
                 Log.i("000", "课表查询成功");
                 mhalder.post(new Runnable() {
                     @Override

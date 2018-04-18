@@ -8,9 +8,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cn.my.forward.R;
+import cn.my.forward.mvp.sourcequery.mvp.bean.TimeTableBean;
 
 /**
  * Created by 123456 on 2018/3/5.
@@ -20,12 +22,37 @@ import cn.my.forward.R;
 public class MyBaseAdapter extends BaseAdapter {
     private Context mContext;
     private LayoutInflater layoutInflater;
-    private List<String> list;
+    private ArrayList<String> list;
+    private boolean isNee = false;
 
-    public MyBaseAdapter(Context context, List<String> list) {
+    public MyBaseAdapter(Context context, List list) {
         mContext = context;
         layoutInflater = LayoutInflater.from(mContext);
-        this.list = list;
+        this.list = toCastData(list);
+    }
+
+    private ArrayList<String> toCastData(List list) {
+        ArrayList<String> mList = new ArrayList<>();
+        int length = ((ArrayList) list.get(1)).size();
+
+        for (int j = 1; j < length; j++)//节数
+        {
+            for (int k = 1; k < list.size(); k++)//星期几
+            {
+                ArrayList tempal3 = (ArrayList) list.get(k);
+                TimeTableBean tempke = (TimeTableBean) tempal3.get(j);
+                if (tempke.getName().equals("空")) {
+                    mList.add("空");
+                } else {
+                    if (tempke.getEndjie() - tempke.getStartjie() >= 2) {
+                        isNee = true;
+                    }
+                    mList.add(tempke.getName() + "@" + tempke.getAddress() + "@" + tempke
+                            .getTeacher());
+                }
+            }
+        }
+        return mList;
     }
 
     @Override
@@ -35,7 +62,9 @@ public class MyBaseAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
+
         return list.get(position);
+
     }
 
     @Override
@@ -55,6 +84,12 @@ public class MyBaseAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
+        if (position >= 24 && isNee) {
+            ViewGroup.LayoutParams layoutParams = viewHolder.mTv
+                    .getLayoutParams();
+            layoutParams.height = 800;
+            viewHolder.mTv.setLayoutParams(layoutParams);
+        }
         if (!getItem(position).equals("空")) {
             viewHolder.mTv.setText((String) getItem(position));
             viewHolder.mTv.setTextColor(Color.WHITE);

@@ -2,17 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/background"
+                android:background="@drawable/ac397b4dc104ea430371cd185a7b848d"
     >
 
-    <TextView
-        android:id="@+id/scoure_show"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_alignLeft="@id/content"
-        android:layout_alignRight="@id/content"
-        android:layout_below="@id/finalto"
-        android:gravity="center"/>
 
     <ProgressBar
         android:id="@+id/scpure_bar"
@@ -23,8 +15,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/show">
-
+        >
 
         <TableLayout
             android:id="@+id/table"
@@ -35,7 +26,7 @@
             android:orientation="vertical"
             android:shrinkColumns="*">
 
-            <TableRow
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -45,16 +36,15 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/className"
-                    android:textColor="@color/colorWhile"/>
+                    />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="@string/ClassScore"
-                    android:textColor="@color/colorWhile"/>
-            </TableRow>
+                    android:text="@string/ClassScore"/>
+            </LinearLayout>
 
 
         </TableLayout>

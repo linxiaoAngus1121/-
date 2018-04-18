@@ -7,7 +7,7 @@ import java.util.List;
  */
 
 public interface ITimeTableView {
-    void showTimeTble(List<String> nodes);  //展示课表
+    void showTimeTble(List nodes);  //展示课表
 
     void showTimeTbleError(String s);   //出现错误
 }

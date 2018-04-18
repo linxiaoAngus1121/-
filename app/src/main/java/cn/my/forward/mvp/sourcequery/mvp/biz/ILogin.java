@@ -20,7 +20,7 @@ public interface ILogin {
 
     void score(IOnQuerySourceListener querySourceListener);
 
-    void timeTable(ITimeTableListener listener);
+    void timeTable(int start, ITimeTableListener listener);
 
     void examQuery(String postion, IExamListener listener);
 

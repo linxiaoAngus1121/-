@@ -91,13 +91,4 @@
         />
 
 
-    <TextView
-        android:id="@+id/show"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_alignLeft="@id/content"
-        android:layout_alignRight="@id/content"
-        android:layout_below="@id/finalto"
-        android:gravity="center"/>
-
 </RelativeLayout>

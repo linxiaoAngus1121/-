@@ -24,6 +24,9 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
+import cn.my.forward.mvp.sourcequery.mvp.bean.TimeTableBean;
+import cn.my.forward.mvp.sourcequery.mvp.utils.CoursePages;
+import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.okhttp.MyOkhttp;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -42,8 +45,6 @@ public class SourceAndLoginBiz implements ILogin {
     private Bean_l bean;
     private static SourceAndLoginBiz mInstance;
     private String viewState;
-    private boolean flag = true;
-
 
     private SourceAndLoginBiz() {
 
@@ -81,8 +82,8 @@ public class SourceAndLoginBiz implements ILogin {
     }
 
     @Override
-    public void timeTable(ITimeTableListener listener) {
-        toTimeQuery(bean, stuName, listener);
+    public void timeTable(int start, ITimeTableListener listener) {
+        toTimeQuery(start, bean, stuName, listener);
     }
 
 
@@ -221,10 +222,6 @@ public class SourceAndLoginBiz implements ILogin {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Log.i("000", flag + "是+++++");
-        //  if (flag) {
-        //第一次进入
         if (document != null) {
             Elements elements = document.select("input");   //第一次进入是为了获取viewstate，同时判断是否需要查询数据
             //获取出第三个input标签
@@ -237,9 +234,7 @@ public class SourceAndLoginBiz implements ILogin {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // }
         getdata(document, listener);
-        // flag = false;
     }
 
     /**
@@ -430,9 +425,11 @@ public class SourceAndLoginBiz implements ILogin {
                         Log.i("000", sb.toString());
                         listener.OnLoginSuccess();
                         stuName = getstName(sb.toString(), indexOf);
-                        break;
+                        return;
                     }
                 }
+                listener.OnLoginError("开了会小差，出错了");
+
             }
         });
     }
@@ -440,11 +437,13 @@ public class SourceAndLoginBiz implements ILogin {
     /**
      * 课表查询
      *
+     * @param start    周数信息
      * @param bean     登录信息
      * @param stuName  学生姓名
      * @param listener 回调监听
      */
-    private void toTimeQuery(Bean_l bean, String stuName, final ITimeTableListener listener) {
+    private void toTimeQuery(final int start, Bean_l bean, String stuName, final ITimeTableListener
+            listener) {
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
         map.put("Connection", " Keep-Alive");
@@ -454,9 +453,8 @@ public class SourceAndLoginBiz implements ILogin {
         map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
         String url = "http://jwxt.sontan.net/xskbcx" +
                 ".aspx?xh=" + bean.getStuNo() + "&xm=" + stuName + "&gnmkdm=N121603";
-        Log.i("000", url);
-        instance.GetRequest(url, map, new
-                Callback() {
+        MyLog.i(url);
+        instance.GetRequest(url, map, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         listener.QuertTimeTableFailure(e.toString());
@@ -468,16 +466,16 @@ public class SourceAndLoginBiz implements ILogin {
                             listener.QuertTimeTableFailure("课表查询出错");
                             return;
                         }
-                        Log.i("000", "请求成功");
+                        MyLog.i("请求成功");
                         String streamtoString = streamtoString(response.body().byteStream());
                         if (streamtoString != null) {
-                            List<String> list = JsoupMethod(streamtoString);
-                            listener.QueryTimeTableSuccess(list);
+                            List<TimeTableBean> list = JsoupMethod(streamtoString);
+                            ArrayList xuanke = CoursePages.xuanke(list);
+                            ArrayList tempal2 = (ArrayList) xuanke.get(start);
+                            listener.QueryTimeTableSuccess(tempal2);
                         } else {
                             listener.QuertTimeTableFailure("课表解析出错");
                         }
-
-
                     }
                 });
 
@@ -489,7 +487,7 @@ public class SourceAndLoginBiz implements ILogin {
      * @param streamtoString jsoup解析的字符串
      * @return 返回最终需要的数据
      */
-    private List<String> JsoupMethod(String streamtoString) {
+    private List<TimeTableBean> JsoupMethod(String streamtoString) {
         Document parse = Jsoup.parse(streamtoString);
         Elements elements = parse.select("table.blacktab");
         List<Node> nodes = elements.get(0).childNode(1).childNodes();
@@ -512,9 +510,9 @@ public class SourceAndLoginBiz implements ILogin {
      * @param nodes 数据源
      * @return 返回可以最终显示的数据
      */
-    private List<String> CastData(ArrayList<Node> nodes) {
-        List<String> list = new ArrayList<>();  //这个list最终展示到界面上的所有信息
-        int s = nodes.size();
+    private List<TimeTableBean> CastData(ArrayList<Node> nodes) {
+        List<TimeTableBean> list = new ArrayList<>();  //这个list最终展示到界面上的所有信息
+        int s = nodes.size();   //每个node节点代表的是星期一到星期五的1，2节，3，4节，5，6节，7，8节，9，10，11节
         for (int i = 0; i < s; i++) {
             Node node = nodes.get(i);
             switch (i) {
@@ -541,21 +539,139 @@ public class SourceAndLoginBiz implements ILogin {
         return list;
     }
 
-    private void dealData2(List<String> list, Node node) {
+    private void dealData2(List<TimeTableBean> list, Node node) {
         int size = node.childNodeSize() - 2;
         for (int t = 2; t < size; t++) {    //取出所有的课程信息
-            String s1 = removeHtml(node.childNode(t).outerHtml());
-            list.add(s1);
+            //  String s1 = removeHtml(node.childNode(t).outerHtml());
+            Node node1 = node.childNode(t);
+            nodeInsert(node1, list);
         }
     }
 
-    private void dealData3(List<String> list, Node node) {
+    private void dealData3(List<TimeTableBean> list, Node node) {
         int size = node.childNodeSize() - 2;
-        for (int t = 3; t < size; t++) {    //取出所有的课程信息
-            String s1 = removeHtml(node.childNode(t).outerHtml());
-            list.add(s1);
+        for (int t = 3; t < size; t++) {    //取出所有的课程信息,去掉部分头尾
+            Node node1 = node.childNode(t);
+            nodeInsert(node1, list);
         }
     }
+
+    /**
+     * 为node节点增加一个<br>标签
+     *
+     * @param node1 哪个node节点
+     * @param list  存放TimeTableBean的list
+     */
+    private void nodeInsert(Node node1, List<TimeTableBean> list) {
+        StringBuilder builder = new StringBuilder(node1.outerHtml());
+        int indexOf = builder.indexOf(">");
+        String insert = builder.insert(indexOf + 1, "<br>").toString();
+        String replace = builder.replace(0, builder.length(), insert).toString();//可以进行提取的东西
+        String[] split = replace.split("<br>");
+        for (int i = 1; i < split.length; i = i + 5) {
+
+            TimeTableBean mTimeBean = new TimeTableBean();
+            for (int j = i; j <= i + 3; j++) {
+                String t = removeHtml(split[j]);
+                if (t.equals("空")) {
+                    break;
+                }
+                if (j == i) {   //课程名
+                    mTimeBean.setName(split[j]);
+                } else if (j == i + 1) {    //课程上课时间
+                    int day[] = selectWeek(split[j]);
+                    mTimeBean.setXingqi(day[0]);
+                    mTimeBean.setStartzhou(day[1]);
+                    mTimeBean.setEndzhou(day[2]);
+                    mTimeBean.setBiaozhi(day[3]);
+                    mTimeBean.setStartjie(day[4]);
+                    if (day[6] != 0) {
+                        mTimeBean.setEndjie(day[6]);
+                    } else {
+                        mTimeBean.setEndjie(day[5]);
+                    }
+                } else if (j == i + 2) {    //课程教师
+                    mTimeBean.setTeacher(split[j]);
+                } else if (j == i + 3) {    //课程地点
+                    mTimeBean.setAddress(removeHtml(split[j]));
+                }
+            }
+            list.add(mTimeBean);
+        }
+
+    }
+
+    /**
+     * 选出是周几等
+     *
+     * @param s 字符串数据
+     * @return [0]代表周几
+     * [1]代表几周开始
+     * [2]几周结束
+     * [3]代表是否单双周，1代表单周，2代表双周，3代表不分周
+     */
+    private int[] selectWeek(String s) {
+        int day[] = new int[7];
+        StringBuilder builder = new StringBuilder(s);
+        int indexOf = builder.indexOf("第");     //第出现的位置
+        int indexOf1 = builder.indexOf("-");    //出现-的位置
+        int indexOf2 = builder.indexOf("{");    //出现{的位置
+        int indexOf3 = builder.indexOf("}");    //出现}的位置
+        int indexOf4 = builder.indexOf("|");     //|出现的位置
+        String substring = builder.substring(indexOf - 1, indexOf);//第前面一位，就是我们需要周几
+        //     MyLog.i(substring);
+        switch (substring) {
+            case "一":
+                day[0] = 1;
+                break;
+            case "二":
+                day[0] = 2;
+                break;
+            case "三":
+                day[0] = 3;
+                break;
+            case "四":
+                day[0] = 4;
+                break;
+            case "五":
+                day[0] = 5;
+                break;
+            case "六":
+                day[0] = 6;
+                break;
+        }
+        String substring1 = builder.substring(indexOf2 + 2, indexOf1);  //-前面的周数
+        day[1] = Integer.valueOf(substring1);
+
+        if (indexOf4 == -1) {   //没有单双周的情况
+            String substring2 = builder.substring(indexOf1 + 1, indexOf3 - 1);  //-后面出现的周数
+            day[2] = Integer.valueOf(substring2);
+            day[3] = 3;                         //=3两周都要上
+        } else {                              //有单双周的情况
+            String substring2 = builder.substring(indexOf1 + 1, indexOf4 - 1);
+            day[2] = Integer.valueOf(substring2);
+            String substring3 = builder.substring(indexOf4 + 1, indexOf3);
+            if (substring3.startsWith("单")) {
+                day[3] = 1;
+            } else {
+                day[3] = 2;
+            }
+            //         MyLog.i(substring2);
+        }
+        String substring4 = builder.substring(indexOf + 1, indexOf2);   //第几节到第几节
+        String[] split = substring4.split(",");
+        for (int i = 0; i < split.length; i++) {
+            if (i == 0) {
+                day[4] = Integer.valueOf(split[i]);
+            } else if (i == 1) {    //这个也可能会包含节字
+                day[5] = Integer.valueOf(split[i].replaceAll("\\D", ""));
+            } else if (i == split.length - 1) {   //这个会包含节字
+                day[6] = Integer.valueOf(split[i].replaceAll("\\D", ""));
+            }
+        }
+        return day;
+    }
+
 
     /**
      * 去除字符串中的html标签
@@ -662,11 +778,11 @@ public class SourceAndLoginBiz implements ILogin {
                     //substring这里是最终需要的__VIEWSTATE
                     String substring = sb.toString().substring(indexOf);
                     String[] split = substring.split("value=\"", 2);
-                    Log.i("000", split[0] + "这是0的部分");
-                    Log.i("000", split[1] + "这是1的部分");  //取1这一部分
+                    //   Log.i("000", split[0] + "这是0的部分");
+                    //  Log.i("000", split[1] + "这是1的部分");  //取1这一部分
                     String[] split1 = split[1].split("\"", 2);//继续splite
-                    Log.i("000", split1[0] + "这是0的部分+++++");    //最终需要的
-                    Log.i("000", split1[1] + "这是1的部分+++++");
+                    //   Log.i("000", split1[0] + "这是0的部分+++++");    //最终需要的
+                    //   Log.i("000", split1[1] + "这是1的部分+++++");
                     substring = split1[0];
                     //默认开始历年成绩查询
                     pastScouce(bean, substring, querySourceListener);
@@ -761,26 +877,26 @@ public class SourceAndLoginBiz implements ILogin {
                 String local = sb.substring(indexOf + 3);   //去掉td>
                 int i1 = local.indexOf("</td>");            //获取到课程名字的结束标签</td>
                 className = local.substring(0, i1);         //截取出姓名
-                Log.i("000", className + "课程名字");       //正确
+                //    Log.i("000", className + "课程名字");       //正确
             }
             if (i == 9) {                                    //第九个<td>是分数
                 String local = sb.substring(indexOf + 3);   //同上
                 int i1 = local.indexOf("</td>");            //同上
                 source = local.substring(0, i1);            //同上
-                Log.i("000", source + "分数是");           //正确
+                //   Log.i("000", source + "分数是");           //正确
 
             }
         }
         Bean_s bean_s = new Bean_s(className, source);      //放入实体类对象中
         list.add(bean_s);
         String s = sb.substring(indexOf - 1);               //因为上面最后一个会+1，所以这里-1
-        Log.i("000", "截取后的" + s);
+        //   Log.i("000", "截取后的" + s);
         int i2 = s.indexOf("<tr");                          //应该跳到下一个<tr 出现的位置
         if (i2 == -1) {                                     //防止出现数组越界
             return;
         }
         String substring1 = s.substring(i2, s.length());     //下一个即将被截取的字符串
-        Log.i("000", "下一个要进行截取的" + substring1);
+        //  Log.i("000", "下一个要进行截取的" + substring1);
         this.docast(substring1);                             //重新执行一遍，再查找下一个成绩
     }
 
@@ -879,5 +995,6 @@ public class SourceAndLoginBiz implements ILogin {
         Log.i("000", substring + "截取到的名字");
         return substring;
     }
+
 
 }

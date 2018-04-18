@@ -2,7 +2,7 @@
     <string name="app_name">ForwarApplication</string>
     <string name="ed_ps">请输入密码</string>
     <string name="ed_code">请输入验证码</string>
-    <string name="query">查询</string>
+    <string name="query">登陆</string>
     <string name="className">课程名称</string>
     <string name="ClassScore">课程成绩</string>
     <string name="stuNo">请输入学号</string>
@@ -13,12 +13,4 @@
     <string name="level_admissionTicket">准考证</string>
     <string name="level_grade">成绩</string>
 
-    <string-array name="exam_time">
-        <item>2017–2018–02</item>
-        <item>2017–2018–01</item>
-        <item>2016–2017–02</item>
-        <item>2016–2017–01</item>
-        <item>2015–2016–02</item>
-        <item>2015–2016–01</item>
-    </string-array>
 </resources>

@@ -7,7 +7,7 @@ import java.util.List;
  */
 
 public interface ITimeTableListener {
-    void QueryTimeTableSuccess(List<String> nodes);
+    void QueryTimeTableSuccess(List nodes);
 
     void QuertTimeTableFailure(String s);
 }
