@@ -444,6 +444,7 @@ public class SourceAndLoginBiz implements ILogin {
      */
     private void toTimeQuery(final int start, Bean_l bean, String stuName, final ITimeTableListener
             listener) {
+
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
         map.put("Connection", " Keep-Alive");
@@ -455,29 +456,29 @@ public class SourceAndLoginBiz implements ILogin {
                 ".aspx?xh=" + bean.getStuNo() + "&xm=" + stuName + "&gnmkdm=N121603";
         MyLog.i(url);
         instance.GetRequest(url, map, new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        listener.QuertTimeTableFailure(e.toString());
-                    }
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.QuertTimeTableFailure(e.toString());
+            }
 
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (response.code() != 200) {
-                            listener.QuertTimeTableFailure("课表查询出错");
-                            return;
-                        }
-                        MyLog.i("请求成功");
-                        String streamtoString = streamtoString(response.body().byteStream());
-                        if (streamtoString != null) {
-                            List<TimeTableBean> list = JsoupMethod(streamtoString);
-                            ArrayList xuanke = CoursePages.xuanke(list);
-                            ArrayList tempal2 = (ArrayList) xuanke.get(start);
-                            listener.QueryTimeTableSuccess(tempal2);
-                        } else {
-                            listener.QuertTimeTableFailure("课表解析出错");
-                        }
-                    }
-                });
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() != 200) {
+                    listener.QuertTimeTableFailure("课表查询出错");
+                    return;
+                }
+                MyLog.i("请求成功");
+                String streamtoString = streamtoString(response.body().byteStream());
+                if (streamtoString != null) {
+                    List<TimeTableBean> list = JsoupMethod(streamtoString);
+                    ArrayList xuanke = CoursePages.xuanke(list);
+                    ArrayList tempal2 = (ArrayList) xuanke.get(start);
+                    listener.QueryTimeTableSuccess(tempal2);
+                } else {
+                    listener.QuertTimeTableFailure("课表解析出错");
+                }
+            }
+        });
 
     }
 
@@ -567,12 +568,40 @@ public class SourceAndLoginBiz implements ILogin {
         int indexOf = builder.indexOf(">");
         String insert = builder.insert(indexOf + 1, "<br>").toString();
         String replace = builder.replace(0, builder.length(), insert).toString();//可以进行提取的东西
+        //这里如果页面出现其他信息的话，应该先把他去除，即先去除
+        // <br>
+        //<font color='red'>(调0230)</font>
+        //<br>
+
+       /* if (replace.contains("<font")) {
+            StringBuilder builder1 = new StringBuilder(replace);
+            int i = builder1.indexOf("<font");  //出现<font的位置
+            int replace1 = builder1.indexOf("</fo nt>");
+            StringBuilder delete = builder1.delete(i - 4, replace1 + 11);
+            replace = delete.toString();
+        }
+*/
+        while (replace.contains("<font")) {
+            StringBuilder builder1 = new StringBuilder(replace);
+            int i = builder1.indexOf("<font");  //出现<font的位置
+            int replace1 = builder1.indexOf("</font>");
+            int i1 = builder1.indexOf("</td>");
+            StringBuilder delete;
+            if (replace1 + 7 == i1) {    //代表是结尾的那个《font》
+                delete = builder1.delete(i - 8, replace1 + 7);
+            } else {
+                delete = builder1.delete(i - 4, replace1 + 11);
+            }
+            replace = delete.toString();
+        }
+
         String[] split = replace.split("<br>");
         for (int i = 1; i < split.length; i = i + 5) {
 
             TimeTableBean mTimeBean = new TimeTableBean();
             for (int j = i; j <= i + 3; j++) {
                 String t = removeHtml(split[j]);
+                assert t != null;
                 if (t.equals("空")) {
                     break;
                 }
@@ -639,17 +668,36 @@ public class SourceAndLoginBiz implements ILogin {
             case "六":
                 day[0] = 6;
                 break;
+            default:    //不满足周的情况,会出现奇怪的情况，直接返回不处理
+                for (int i = 1; i <= 6; i++) {
+                    day[i] = 0;
+                }
+                return day;
         }
         String substring1 = builder.substring(indexOf2 + 2, indexOf1);  //-前面的周数
         day[1] = Integer.valueOf(substring1);
 
         if (indexOf4 == -1) {   //没有单双周的情况
             String substring2 = builder.substring(indexOf1 + 1, indexOf3 - 1);  //-后面出现的周数
-            day[2] = Integer.valueOf(substring2);
+            try {
+                day[2] = Integer.valueOf(substring2);
+            } catch (NumberFormatException e) {
+                for (int i = 1; i <= 6; i++) {
+                    day[i] = 0;
+                }
+                return day;
+            }
             day[3] = 3;                         //=3两周都要上
         } else {                              //有单双周的情况
             String substring2 = builder.substring(indexOf1 + 1, indexOf4 - 1);
-            day[2] = Integer.valueOf(substring2);
+            try {
+                day[2] = Integer.valueOf(substring2);
+            } catch (NumberFormatException e) {
+                for (int i = 1; i <= 6; i++) {
+                    day[i] = 0;
+                }
+                return day;
+            }
             String substring3 = builder.substring(indexOf4 + 1, indexOf3);
             if (substring3.startsWith("单")) {
                 day[3] = 1;
@@ -661,13 +709,21 @@ public class SourceAndLoginBiz implements ILogin {
         String substring4 = builder.substring(indexOf + 1, indexOf2);   //第几节到第几节
         String[] split = substring4.split(",");
         for (int i = 0; i < split.length; i++) {
-            if (i == 0) {
-                day[4] = Integer.valueOf(split[i]);
-            } else if (i == 1) {    //这个也可能会包含节字
-                day[5] = Integer.valueOf(split[i].replaceAll("\\D", ""));
-            } else if (i == split.length - 1) {   //这个会包含节字
-                day[6] = Integer.valueOf(split[i].replaceAll("\\D", ""));
+            try {
+                if (i == 0) {
+                    day[4] = Integer.valueOf(split[i]);
+                } else if (i == 1) {    //这个也可能会包含节字
+                    day[5] = Integer.valueOf(split[i].replaceAll("\\D", ""));
+                } else if (i == split.length - 1) {   //这个会包含节字
+                    day[6] = Integer.valueOf(split[i].replaceAll("\\D", ""));
+                }
+            } catch (NumberFormatException e) {
+                for (int t = 1; t <= 6; t++) {
+                    day[t] = 0;
+                }
+                return day;
             }
+
         }
         return day;
     }

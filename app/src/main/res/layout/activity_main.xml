@@ -23,7 +23,7 @@
             android:layout_marginLeft="15dp"
             android:background="@null"
             android:hint="@string/stuNo"
-            android:text="1508030250"
+            android:text="@string/xuehao"
             android:textSize="28sp"
             />
 
@@ -40,7 +40,7 @@
             android:background="@null"
             android:hint="@string/ed_ps"
             android:inputType="textPassword"
-            android:text="123456789aa"
+            android:text="@string/ps"
             android:textSize="28sp"
             />
 
