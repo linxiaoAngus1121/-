@@ -10,6 +10,8 @@ import android.widget.GridView;
 
 import cn.my.forward.adapter.MyAdapter;
 
+import static cn.my.forward.R.string.stuNo;
+
 public class ChoiseActivity extends AppCompatActivity {
 
     private Intent mIntent;
@@ -27,6 +29,8 @@ public class ChoiseActivity extends AppCompatActivity {
                 switch (position) {
                     case 0:
                         mIntent = new Intent(ChoiseActivity.this, SourceQueryActivity.class);
+                        String s_no = getIntent().getStringExtra("stu_no");
+                        mIntent.putExtra("stu_no", s_no);
                         break;
                     case 1:
                         mIntent = new Intent(ChoiseActivity.this, TimeTableActivity.class);
@@ -39,6 +43,7 @@ public class ChoiseActivity extends AppCompatActivity {
                     case 3:
                         mIntent = new Intent(ChoiseActivity.this, LevelActivity.class);
                         break;
+                    case 5:
                     default:
                         break;
                 }

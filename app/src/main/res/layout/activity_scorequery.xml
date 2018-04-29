@@ -5,6 +5,11 @@
                 android:background="@drawable/ac397b4dc104ea430371cd185a7b848d"
     >
 
+    <Spinner
+        android:id="@+id/scoure_query_sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
 
     <ProgressBar
         android:id="@+id/scpure_bar"
@@ -12,43 +17,51 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
 
-    <ScrollView
+    <!-- <ScrollView
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:layout_below="@id/scoure_query_sp"
+         >
+
+
+
+         <TableLayout
+             android:id="@+id/table"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_alignLeft="@id/content"
+             android:layout_alignRight="@id/content"
+             android:orientation="vertical"
+             android:shrinkColumns="*">
+ &lt;!&ndash;
+
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content">
+
+                 <TextView
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:layout_weight="1"
+                     android:gravity="center"
+                     android:text="@string/className"
+                     />
+
+                 <TextView
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:layout_weight="1"
+                     android:gravity="center"
+                     android:text="@string/ClassScore"/>
+             </LinearLayout>&ndash;&gt;
+
+         </TableLayout>
+     </ScrollView>-->
+
+    <ListView
+        android:layout_below="@id/scoure_query_sp"
+        android:id="@+id/scoure_data_lv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-
-        <TableLayout
-            android:id="@+id/table"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/content"
-            android:layout_alignRight="@id/content"
-            android:orientation="vertical"
-            android:shrinkColumns="*">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/className"
-                    />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/ClassScore"/>
-            </LinearLayout>
-
-
-        </TableLayout>
-    </ScrollView>
-
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

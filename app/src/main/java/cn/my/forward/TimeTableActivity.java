@@ -121,4 +121,11 @@ public class TimeTableActivity extends AppCompatActivity implements ITimeTableVi
             });
         }
     }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter = null;
+    }
 }

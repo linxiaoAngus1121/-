@@ -185,14 +185,15 @@ public class SourcePresenter {
         this.prepareLogin();
     }
 
-    public void scoureQuery() {
-        sourceQuery.score(new IOnQuerySourceListener() {
+    public void scoureQuery(String year) {
+        sourceQuery.score(year, new IOnQuerySourceListener() {
             @Override
             public void OnQuerySuccess(final ArrayList<Bean_s> list) {
+                final ArrayList<String> strings = Bean_sToString(list);
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        view.showSource(list);
+                        view.showSource(strings);
                     }
                 });
             }
@@ -209,9 +210,17 @@ public class SourcePresenter {
         });
     }
 
+    private ArrayList<String> Bean_sToString(ArrayList<Bean_s> list) {
+        ArrayList<String> mlist = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            mlist.add(list.get(i).getClassName() + list.get(i).getScore());
+        }
+        return mlist;
+    }
+
     public void timetable(int start) {
 
-        sourceQuery.timeTable(start,new ITimeTableListener() {
+        sourceQuery.timeTable(start, new ITimeTableListener() {
             @Override
             public void QueryTimeTableSuccess(final List nodes) {
                 Log.i("000", "课表查询成功");

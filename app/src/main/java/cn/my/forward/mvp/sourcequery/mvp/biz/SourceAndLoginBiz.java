@@ -35,7 +35,7 @@ import okhttp3.Response;
 
 /**
  * Created by 123456 on 2018/2/9.
- * 登录，查询成绩类
+ * 逻辑处理层
  */
 
 public class SourceAndLoginBiz implements ILogin {
@@ -77,8 +77,8 @@ public class SourceAndLoginBiz implements ILogin {
     }
 
     @Override
-    public void score(IOnQuerySourceListener querySourceListener) {
-        toGradeQurry(bean, querySourceListener);
+    public void score(String year, IOnQuerySourceListener querySourceListener) {
+        toGradeQurry(year, bean, querySourceListener);
     }
 
     @Override
@@ -129,6 +129,7 @@ public class SourceAndLoginBiz implements ILogin {
             }
         });
     }
+
 
     /**
      * 截取等级考试的html
@@ -631,13 +632,15 @@ public class SourceAndLoginBiz implements ILogin {
     }
 
     /**
-     * 选出是周几等
+     * 选出是周几等，如果某一块出现问题，就会忽视，全部返回o
      *
      * @param s 字符串数据
      * @return [0]代表周几
      * [1]代表几周开始
      * [2]几周结束
      * [3]代表是否单双周，1代表单周，2代表双周，3代表不分周
+     * [4] 第几节开始
+     * [5] [6] 第几节结束
      */
     private int[] selectWeek(String s) {
         int day[] = new int[7];
@@ -793,11 +796,13 @@ public class SourceAndLoginBiz implements ILogin {
     /**
      * 进行成绩查询
      *
+     * @param year                包含学年学期信息
      * @param bean                实体类
      * @param querySourceListener 成绩查询回调
      */
 
-    private void toGradeQurry(final Bean_l bean, final IOnQuerySourceListener querySourceListener) {
+    private void toGradeQurry(final String year, final Bean_l bean, final IOnQuerySourceListener
+            querySourceListener) {
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
         map.put("Connection", " Keep-Alive");
@@ -841,7 +846,18 @@ public class SourceAndLoginBiz implements ILogin {
                     //   Log.i("000", split1[1] + "这是1的部分+++++");
                     substring = split1[0];
                     //默认开始历年成绩查询
-                    pastScouce(bean, substring, querySourceListener);
+                    //pastScouce(bean, substring, "2016-2017", "2", querySourceListener);
+                    if (year.equals("")) {
+                        pastScouce(bean, substring, "", "", querySourceListener);
+                    } else {
+                        StringBuilder builder = new StringBuilder(year);
+                        String[] s = new String[5];
+                        int index = builder.lastIndexOf("-");
+                        s[0] = builder.substring(0, index);//年
+                        s[1] = builder.substring(index + 1);//学期
+                        MyLog.i(s[0] + s[1] + "这即使数据");
+                        pastScouce(bean, substring, s[0], s[1], querySourceListener);
+                    }
                 }
             }
         });
@@ -849,14 +865,16 @@ public class SourceAndLoginBiz implements ILogin {
 
 
     /**
-     * 历年成绩查询
+     * 成绩查询
      *
      * @param bean                实体类
-     * @param substring           需要的参数__VIEWSTATE
+     * @param substring1          viewstatstate
+     * @param s                   学年
+     * @param substring           学期
      * @param querySourceListener 回调
      */
-    private void pastScouce(Bean_l bean, String substring, final IOnQuerySourceListener
-            querySourceListener) {
+    private void pastScouce(Bean_l bean, final String substring1, final String s, final String
+            substring, final IOnQuerySourceListener querySourceListener) {
         String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
                 "&xm=" + stuName + "&gnmkdm=N121605";
         Log.i("000", url);
@@ -870,29 +888,36 @@ public class SourceAndLoginBiz implements ILogin {
                 + "&xm=" + utf8Togb2312 + "&gnmkdm=N121605");
         map.put("Content-Type", "application/x-www-form-urlencoded");
         map.put("Accept", "text/html, application/xhtml+xml, image/jxr, */*");
-        map.put("Content-Length", "3946");
         map.put("Accept-Language", "zh-CN,zh;q=0.8");
-        instance.PostRequest(url, substring, map, new Callback() {
+        instance.PostRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i("000", e.getMessage() + "历年成绩失败");
+                MyLog.i(e.getMessage() + "查询成绩失败");
                 querySourceListener.OnError(e.toString());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() == 200) {
-                    Log.i("000", "查询历年成绩成功");
+                    //       parseToFile(response.body().byteStream());
                     String cast = cast(response.body().byteStream());
-                    if (cast == null) {
-                        querySourceListener.OnError("查询成绩时发生未知错误");
-                        return;
-                    }
+                 /*   if (substring.equals("") || s.equals("")) {
+                        Log.i("000", "查询成绩成功");
+                        if (cast == null) {
+                            querySourceListener.OnError("查询成绩时发生未知错误");
+                            return;
+                        }
+                        finalCast(cast);
+                        querySourceListener.OnQuerySuccess(list);
+                    } else {
+                        //这里执行的是有学期的
+                        MyLog.i("走了另外一个方法");
+                    }*/
                     finalCast(cast);
                     querySourceListener.OnQuerySuccess(list);
                 }
             }
-        });
+        }, substring1, s, substring);
     }
 
 
@@ -902,8 +927,14 @@ public class SourceAndLoginBiz implements ILogin {
      * @param cast 数据源
      */
     private void finalCast(String cast) {
+        if (list.size() > 0) { //这里返回的数据要先清除，不然会由于单例而造成的数据错乱
+            list.clear();
+        }
         StringBuilder builder = new StringBuilder(cast);
         int indexOf = builder.indexOf("<tr>");
+        if (indexOf == -1) {    //为空的情况下
+            return;
+        }
         String substring = builder.substring(indexOf, builder.length());
         Log.i("000", substring + "substring++++++++");
         //还需要对数据进行裁剪
@@ -978,7 +1009,7 @@ public class SourceAndLoginBiz implements ILogin {
             }
             int i = sb.lastIndexOf("datelisthead");
             String substring = sb.substring(i, num);
-            Log.i("000", substring + "成绩成绩");
+            MyLog.i(substring + "成绩成绩");
             return substring;
         } catch (Exception e) {
             e.printStackTrace();
@@ -1032,7 +1063,7 @@ public class SourceAndLoginBiz implements ILogin {
             builder.append("%");
             builder.append(anA);
         }
-        Log.i("000", builder.toString() + "拼接完成");
+        MyLog.i(builder.toString() + "拼接完成");
 
         return builder.toString();
     }

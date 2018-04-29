@@ -16,7 +16,6 @@ import android.widget.Toast;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
 
@@ -68,7 +67,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     }
 
     @Override
-    public void showSource(ArrayList<Bean_s> list) {
+    public void showSource(ArrayList<String> list) {
 
     }
 
@@ -104,7 +103,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
 
     @Override
     public void showLoginError() {
-        Toast.makeText(this, "登录失败", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "登录失败,请刷新验证码后重试", Toast.LENGTH_SHORT).show();
         mButton.setText("登陆");
         mButton.setClickable(true);
     }
@@ -145,5 +144,11 @@ public class MainActivity extends BaseActivity implements ILoginView, View
                         InputMethodManager.HIDE_NOT_ALWAYS);
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter = null;
     }
 }

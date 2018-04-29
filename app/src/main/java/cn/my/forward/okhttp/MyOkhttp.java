@@ -1,11 +1,10 @@
 package cn.my.forward.okhttp;
 
 
-import android.util.Log;
-
 import java.util.Map;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
+import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -75,17 +74,18 @@ public class MyOkhttp {
     }
 
     /**
-     * 构建post请求
+     * 构建post请求(历年成绩查询)
      *
      * @param url      访问的地址
-     * @param sub      需要的viewstate
      * @param map      请求头封装在此map中
      * @param callback 回调监听
+     * @param sub      需要的viewstate,学年，学期信息
      */
-    public void PostRequest(String url, String sub, Map<String, String> map, Callback callback) {
-        Request request = buildPostRequestBody(url, sub, map);
+    public void PostRequest(String url, Map<String, String> map, Callback callback, String... sub) {
+        Request request = buildPostRequestBody(url, map, sub);
         client.newCall(request).enqueue(callback);
     }
+
 
     public void PostExamRequest(String url, String view, String[] s, Map<String, String> map,
                                 Callback
@@ -117,14 +117,13 @@ public class MyOkhttp {
     }
 
     /**
-     * 构建request对想
+     * 构建request对象
      *
      * @param url 访问的地址
      * @param sub 需要的viewstate
-     * @param m   请求头信息
-     * @return 构建好的request
+     * @param m   请求头信息    @return 构建好的request
      */
-    private Request buildPostRequestBody(String url, String sub, Map<String, String> m) {
+    private Request buildPostRequestBody(String url, Map<String, String> m, String... sub) {
         FormBody formBody = buildBody(sub);
         Request.Builder post = new Request.Builder().url(url).post(formBody);
         for (Map.Entry<String, String> stringStringEntry : m.entrySet()) {
@@ -151,7 +150,6 @@ public class MyOkhttp {
             Map.Entry element = (Map.Entry) stringStringEntry;
             String strKey = (String) element.getKey();
             String strObj = (String) element.getValue();
-
             post.header(strKey, strObj);
         }
         return post.build();
@@ -181,21 +179,37 @@ public class MyOkhttp {
     /**
      * 构建历年成绩查询需要传入的参数
      *
-     * @param substring viewstate参数
      * @return body请请求体
      */
-    private FormBody buildBody(String substring) {
-        return new FormBody
-                .Builder()
-                .add("__EVENTTARGET", "")
-                .add("__EVENTARGUMENT", "")
-                .add("__VIEWSTATE", substring)
-                .add("hidLanguage", "")
-                .add("ddlXN", "")
-                .add("ddlXQ", "")
-                .add("ddl_kcxz", "")
-                .add("btn_zcj", "历年成绩")
-                .build();
+    private FormBody buildBody(String... sub) {
+        MyLog.i("构建历年成绩查询需要传入的参数" + sub[0] + "viewstate" + sub[1] + "学年" + sub[2] + "学期");
+        if (sub[1].equals("") && sub[2].equals("")) { //历年成绩查询
+            return new FormBody.Builder()
+                    .add("__EVENTTARGET", "")
+                    .add("__EVENTARGUMENT", "")
+                    .add("__VIEWSTATE", sub[0])
+                    .add("hidLanguage", "")
+                    .add("ddlXN", "")
+                    .add("ddlXQ", "")
+                    .add("ddl_kcxz", "")
+                    //历年成绩
+                    .add("btn_zcj", "历年成绩")
+                    .build();
+        }else{
+            //如果sub[1],sub[2]是空的话，那就是历年成绩查询。否则的就是学期成绩
+            return new FormBody.Builder()
+                    .add("__EVENTTARGET", "")
+                    .add("__EVENTARGUMENT", "")
+                    .add("__VIEWSTATE", sub[0])
+                    .add("hidLanguage", "")
+                    .add("ddlXN", sub[1])
+                    .add("ddlXQ", sub[2])
+                    .add("ddl_kcxz", "")
+                    //这里修改了，学期成绩，
+                    .add("btn_xq", "学期成绩")
+                    .build();
+        }
+
     }
 
 
@@ -205,8 +219,6 @@ public class MyOkhttp {
      */
 
     private FormBody buildBodyExam(String viewstate, String[] s) {
-        Log.i("000", s[0] + "这是s0");
-        Log.i("000", s[1] + "这是s1");
         return new FormBody.Builder()
                 .add("__EVENTTARGET", "xnd")
                 .add("__EVENTARGUMENT", "")
