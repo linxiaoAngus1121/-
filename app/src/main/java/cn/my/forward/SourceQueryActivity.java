@@ -16,13 +16,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.my.forward.mvp.sourcequery.mvp.adapter.MyListViewAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 
 public class SourceQueryActivity extends AppCompatActivity implements ISourceView {
 
-    //  private TableLayout mLayout;
 
     private SourcePresenter presenter = new SourcePresenter(this);
 
@@ -30,7 +30,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
     private boolean isFirst = true;
     private ListView mLv;
     private List<String> mlist;
-    private ArrayAdapter<String> adapter;
+    private MyListViewAdapter adapter;
 
     /**
      * 生成spinner适配器所需要的数据
@@ -72,7 +72,6 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
         setContentView(R.layout.activity_scorequery);
         mlist = new ArrayList<>();
         Spinner mSpinner = (Spinner) findViewById(R.id.scoure_query_sp);
-        //  mLayout = (TableLayout) findViewById(R.id.table);
         mLv = (ListView) findViewById(R.id.scoure_data_lv);
         bar = (ProgressBar) findViewById(R.id.scpure_bar);
         String stuNo = getIntent().getStringExtra("stu_no");
@@ -102,22 +101,19 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
             }
         });
-        adapter = new ArrayAdapter<String>(this, android.R.layout
-                .simple_list_item_1, mlist);
+
+        //  adapter = new ArrayAdapter<String>(this, R.layout.activity_scoure_showitem, mlist);
+        adapter = new MyListViewAdapter(this, mlist);
         mLv.setAdapter(adapter);
     }
 
     @Override
     public void showSource(ArrayList<String> list) {
         bar.setVisibility(View.GONE);
-     /*   if (list.size() == 0) {
-          adapter.notifyDataSetChanged();
-            return;
-        }*/
         mlist.clear();
         mlist.addAll(list);
-        adapter.notifyDataSetChanged();
-        if (list.size()==0){
+        adapter.notifyDataSetChanged(); //更新数据源，提示listview刷新
+        if (list.size() == 0) {
             Toast.makeText(this, "这学期还没有数据哟", Toast.LENGTH_SHORT).show();
         }
     }

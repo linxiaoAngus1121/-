@@ -213,7 +213,7 @@ public class SourcePresenter {
     private ArrayList<String> Bean_sToString(ArrayList<Bean_s> list) {
         ArrayList<String> mlist = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
-            mlist.add(list.get(i).getClassName() + list.get(i).getScore());
+            mlist.add(list.get(i).getClassName() + "空" + list.get(i).getScore());
         }
         return mlist;
     }
