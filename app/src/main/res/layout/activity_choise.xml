@@ -2,21 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical">
+              android:orientation="vertical"
+    >
 
-    <!-- <Button
-         android:onClick="toTable"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:text="课表查询"
-         />
-
-     <Button
-         android:onClick="toScore"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:text="成绩查询"
-         />-->
+    <TextView
+        android:id="@+id/choise_showName_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="欢迎你："/>
 
     <GridView
         android:id="@+id/choise_grid"

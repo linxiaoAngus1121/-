@@ -154,7 +154,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
     }
 
     @Override
-    public void showLoginSuccess() {
+    public void showLoginSuccess(String name) {
     }
 
     @Override

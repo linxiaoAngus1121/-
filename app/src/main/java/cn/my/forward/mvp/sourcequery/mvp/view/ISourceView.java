@@ -25,7 +25,7 @@ public interface ISourceView {
 
     void showViewStateError(String s);      //获取viewstate失败
 
-    void showLoginSuccess();
+    void showLoginSuccess(String name);
 
     void showLoginError();
 

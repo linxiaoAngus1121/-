@@ -160,11 +160,11 @@ public class SourcePresenter {
 
         sourceQuery.login(bean01, new IOnLoginListener() {
             @Override
-            public void OnLoginSuccess() {
+            public void OnLoginSuccess(final String name) {
                 mhalder.post(new Runnable() {//这样view.showLoginSuccess()方法就会执行在主线程中
                     @Override
                     public void run() {
-                        view.showLoginSuccess();
+                        view.showLoginSuccess(name);
                     }
                 });
             }

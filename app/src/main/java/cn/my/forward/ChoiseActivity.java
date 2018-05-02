@@ -7,10 +7,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import cn.my.forward.adapter.MyAdapter;
-
-import static cn.my.forward.R.string.stuNo;
 
 public class ChoiseActivity extends AppCompatActivity {
 
@@ -22,14 +21,17 @@ public class ChoiseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choise);
         mGridView = (GridView) findViewById(R.id.choise_grid);
+        TextView tv = (TextView) findViewById(R.id.choise_showName_tv);
+        String stu_name = getIntent().getStringExtra("stu_name");
+        tv.append(stu_name);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s_no = getIntent().getStringExtra("stu_no");
                 Log.i("000", "当前的postion" + position);
                 switch (position) {
                     case 0:
                         mIntent = new Intent(ChoiseActivity.this, SourceQueryActivity.class);
-                        String s_no = getIntent().getStringExtra("stu_no");
                         mIntent.putExtra("stu_no", s_no);
                         break;
                     case 1:

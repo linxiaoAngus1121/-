@@ -5,7 +5,7 @@ package cn.my.forward.mvp.sourcequery.mvp.biz;
  */
 
 public interface IOnLoginListener {
-    void OnLoginSuccess();
+    void OnLoginSuccess(String username);
 
     void OnLoginError(String s);
 

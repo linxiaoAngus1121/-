@@ -12,7 +12,9 @@
     <string name="level">级别</string>
     <string name="level_admissionTicket">准考证</string>
     <string name="level_grade">成绩</string>
-    <string name="xuehao">1508030250</string>
-    <string name="ps">123456789aa</string>
+    <string name="remember_ps">记住密码</string>
+    <string name="subject">学科</string>
+    <string name="score">成绩</string>
+    <string name="choise_week">请选择周数</string>
 
 </resources>

@@ -424,8 +424,8 @@ public class SourceAndLoginBiz implements ILogin {
                     if (indexOf != -1) {   //找到了
                         Log.i("000", "找到了");
                         Log.i("000", sb.toString());
-                        listener.OnLoginSuccess();
                         stuName = getstName(sb.toString(), indexOf);
+                        listener.OnLoginSuccess(stuName);
                         return;
                     }
                 }

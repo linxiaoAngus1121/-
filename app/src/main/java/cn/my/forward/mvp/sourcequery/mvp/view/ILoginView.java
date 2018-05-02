@@ -26,7 +26,7 @@ public interface ILoginView extends ISourceView {
     void showViewStateError(String s);
 
     @Override
-    void showLoginSuccess();
+    void showLoginSuccess(String name);
 
     @Override
     void showLoginError();

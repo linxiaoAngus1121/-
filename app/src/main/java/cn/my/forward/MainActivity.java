@@ -2,6 +2,7 @@ package cn.my.forward;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.os.StrictMode;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -24,9 +26,11 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     private EditText editText;  //验证码
     private EditText mEditnum;  //学号
     private EditText mEditPass; //密码
+    private CheckBox mCheckBox; //复选框
     private ImageView miv;
     private Button mButton;
     private SourcePresenter presenter = new SourcePresenter(this);
+    private static final String FILE_NAME = "MyPs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +43,19 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll()
                 .build();
         StrictMode.setThreadPolicy(policy);
+        SharedPreferences preferences = getSharedPreferences(FILE_NAME, MODE_PRIVATE);
+        String no = preferences.getString("no", "");
+        String ps = preferences.getString("ps", "");
         mEditnum = (EditText) findViewById(R.id.ed_num);
         mEditPass = (EditText) findViewById(R.id.edit_password);
         miv = (ImageView) findViewById(R.id.showCode);
         mButton = (Button) findViewById(R.id.finalto);
         editText = (EditText) findViewById(R.id.edit_ps);
+        mCheckBox = (CheckBox) findViewById(R.id.activity_main_remberps_cb);
         miv.setOnClickListener(this);
         mButton.setOnClickListener(this);
-
+        mEditnum.setText(no);
+        mEditPass.setText(ps);
         //预备登陆
         presenter.prepareLogin();
     }
@@ -94,11 +103,28 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     }
 
     @Override
-    public void showLoginSuccess() {
+    public void showLoginSuccess(String name) {
+        if (mCheckBox.isChecked()) {
+            remberPs(this.getstudNo(), this.getstuPs());
+        }
         Intent intent = new Intent(MainActivity.this, ChoiseActivity.class);
         intent.putExtra("stu_no", this.getstudNo());
+        intent.putExtra("stu_name", name);
         startActivity(intent);
         finish();
+    }
+
+    /**
+     * 记住密码功能
+     *
+     * @param s        学号
+     * @param getstuPs 密码
+     */
+    private void remberPs(String s, String getstuPs) {
+        SharedPreferences.Editor edit = getSharedPreferences(FILE_NAME, MODE_PRIVATE).edit();
+        edit.putString("no", s);
+        edit.putString("ps", getstuPs);
+        edit.apply();
     }
 
     @Override
@@ -151,10 +177,5 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         super.onDestroy();
         presenter = null;
     }
-    
-     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter = null;
-    }
+
 }

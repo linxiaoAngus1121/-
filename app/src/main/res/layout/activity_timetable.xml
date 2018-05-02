@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:gravity="center"
-        android:text="请选择周数"
+        android:text="@string/choise_week"
         android:textSize="23sp"
         />
 
@@ -117,12 +117,14 @@
                     android:text="十一"
                     android:textSize="12sp"/>
 
+
             </LinearLayout>
 
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:background="#E5E5E5"/>
+
 
             <GridView
                 android:id="@+id/courceDetail"
@@ -137,3 +139,5 @@
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
+
+
