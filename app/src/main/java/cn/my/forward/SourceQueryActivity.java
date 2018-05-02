@@ -3,7 +3,6 @@ package cn.my.forward;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,7 +17,6 @@ import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyListViewAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
-import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 
 public class SourceQueryActivity extends AppCompatActivity implements ISourceView {
@@ -54,6 +52,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
      */
     private ArrayList<String> getList(String stuNo) {
         ArrayList<String> list = new ArrayList<>();
+
         int j = Integer.valueOf(stuNo) + 2000;    //2015
         for (int i = j + 2; i >= j; i--) { //2018开始
             for (int h = 2; h > 0; h--) {
@@ -62,6 +61,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
                 list.add(line);
             }
         }
+        list.add("历年成绩");
         return list;
     }
 
@@ -81,16 +81,15 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
+                //第一次进入的时候，这里会重复请求，所以要设置一个标志位，防止第一次请求出现问题
                 if (isFirst && position == 0) {
-                    MyLog.i("走了isfirst里面");
                     isFirst = false;
                     return;
                 }
-                //从0开始
+
                 if (bar != null) {
                     bar.setVisibility(View.VISIBLE);
                 }
-                Log.i("000", position + "选择的位置");
                 String parentItemAtPosition = (String) parent.getItemAtPosition(position);
                 presenter.scoureQuery(parentItemAtPosition);//学期成绩查询
 
@@ -102,7 +101,6 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
             }
         });
 
-        //  adapter = new ArrayAdapter<String>(this, R.layout.activity_scoure_showitem, mlist);
         adapter = new MyListViewAdapter(this, mlist);
         mLv.setAdapter(adapter);
     }

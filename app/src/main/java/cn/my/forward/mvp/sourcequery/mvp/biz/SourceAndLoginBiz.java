@@ -820,7 +820,7 @@ public class SourceAndLoginBiz implements ILogin {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() == 200) {
-                    Log.i("000", "进入成绩成功了");
+                    MyLog.i("进入成绩成功了");
                     //接下来点击历年成绩，但是首先要去获取到页面上的__VIEWSTATE
                     InputStream inputStream = response.body().byteStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -845,9 +845,9 @@ public class SourceAndLoginBiz implements ILogin {
                     //   Log.i("000", split1[0] + "这是0的部分+++++");    //最终需要的
                     //   Log.i("000", split1[1] + "这是1的部分+++++");
                     substring = split1[0];
-                    //默认开始历年成绩查询
-                    //pastScouce(bean, substring, "2016-2017", "2", querySourceListener);
-                    if (year.equals("")) {
+                    if (year.equals("")) {   //默认开始历年成绩查询
+                        pastScouce(bean, substring, "", "", querySourceListener);
+                    } else if (year.equals("历年成绩")) {  //选择的是历年成绩查询拿一项
                         pastScouce(bean, substring, "", "", querySourceListener);
                     } else {
                         StringBuilder builder = new StringBuilder(year);
