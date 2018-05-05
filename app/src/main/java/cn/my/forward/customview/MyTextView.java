@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 
 /**
  * Created by 123456 on 2018/4/15.
+ * 自定义星期的TextView
  */
 
 public class MyTextView extends android.support.v7.widget.AppCompatTextView {

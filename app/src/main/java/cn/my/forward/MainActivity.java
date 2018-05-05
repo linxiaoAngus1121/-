@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -25,7 +26,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         .OnClickListener {
     private EditText editText;  //验证码
     private EditText mEditnum;  //学号
-    private EditText mEditPass; //密码
+    private cn.my.forward.customview.MyPsEditText mEditPass; //密码
     private CheckBox mCheckBox; //复选框
     private ImageView miv;
     private Button mButton;
@@ -47,7 +48,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         String no = preferences.getString("no", "");
         String ps = preferences.getString("ps", "");
         mEditnum = (EditText) findViewById(R.id.ed_num);
-        mEditPass = (EditText) findViewById(R.id.edit_password);
+        mEditPass = (cn.my.forward.customview.MyPsEditText) findViewById(R.id.edit_password);
         miv = (ImageView) findViewById(R.id.showCode);
         mButton = (Button) findViewById(R.id.finalto);
         editText = (EditText) findViewById(R.id.edit_ps);
@@ -147,6 +148,11 @@ public class MainActivity extends BaseActivity implements ILoginView, View
                 break;
 
             case R.id.finalto:  //登录按钮
+                if (TextUtils.isEmpty(this.getstudNo()) || TextUtils.isEmpty(this.getstuPs()) ||
+                        TextUtils.isEmpty(this.getCode())) {
+                    Toast.makeText(this, "不可以偷懒不填哟", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 presenter.login();
                 mButton.setText("正在登陆");
                 mButton.setClickable(false);

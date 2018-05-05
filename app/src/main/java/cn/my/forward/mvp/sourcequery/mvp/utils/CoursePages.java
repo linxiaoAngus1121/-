@@ -12,7 +12,7 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.TimeTableBean;
 
 public class CoursePages {
 
-    public static ArrayList al1 = new ArrayList(20);
+    private static ArrayList al1 = new ArrayList(20);
 
     public static ArrayList xuanke(List<TimeTableBean> al5) {
 
