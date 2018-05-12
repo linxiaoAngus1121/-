@@ -25,6 +25,7 @@ import cn.my.forward.mvp.sourcequery.mvp.biz.SourceAndLoginBiz;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IExamView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILevealView;
+import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
 import cn.my.forward.mvp.sourcequery.mvp.view.IPersonView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ITimeTableView;
@@ -41,6 +42,7 @@ public class SourcePresenter {
     private IExamView mExamView;
     private ILevealView mLevel;
     private IPersonView mPerson;
+    private ILoginView mLoginView;
     private Bean_l bean01;
     private Handler mhalder = new Handler(Looper.getMainLooper());  //让handler运行在主线程中
 
@@ -56,6 +58,8 @@ public class SourcePresenter {
             mLevel = (ILevealView) view;
         } else if (view instanceof IPersonView) {
             mPerson = (IPersonView) view;
+        } else if (view instanceof ILoginView) {
+            mLoginView = (ILoginView) view;
         } else {
             try {
                 throw new Exception("大哥，你错了");
@@ -162,7 +166,7 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        view.showCode(inputStream);
+                        mLoginView.showCode(inputStream);
                     }
                 });
 
@@ -175,7 +179,7 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        view.showCodeError(s);
+                        mLoginView.showCodeError(s);
                     }
                 });
 
@@ -186,7 +190,7 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        view.showViewStateError(s);
+                        mLoginView.showViewStateError(s);
                     }
                 });
 
@@ -195,12 +199,11 @@ public class SourcePresenter {
 
     }
 
-
     public void login() {
-        view.closekeyboard();
-        bean01.setStuNo(view.getstudNo());
-        bean01.setStuPs(view.getstuPs());
-        bean01.setCode(view.getCode());
+        mLoginView.closekeyboard();
+        bean01.setStuNo(mLoginView.getstudNo());
+        bean01.setStuPs(mLoginView.getstuPs());
+        bean01.setCode(mLoginView.getCode());
         MyLog.i(bean01.toString());
         sourceQuery.login(bean01, new IOnLoginListener() {
             @Override
@@ -208,7 +211,7 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {//这样view.showLoginSuccess()方法就会执行在主线程中
                     @Override
                     public void run() {
-                        view.showLoginSuccess(name);
+                        mLoginView.showLoginSuccess(name);
                     }
                 });
             }
@@ -218,7 +221,7 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        view.showLoginError();
+                        mLoginView.showLoginError();
                     }
                 });
             }
@@ -305,6 +308,9 @@ public class SourcePresenter {
     }
 
     public void clearAll() {
+        if (mLoginView != null) {
+            mLoginView = null;
+        }
         if (view != null) {
             view = null;
         }

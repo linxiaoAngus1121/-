@@ -7,6 +7,7 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 
 /**
  * Created by 123456 on 2018/2/9.
+ * 登陆获取验证回调
  */
 
 public interface IGetCodeListtener {

@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * Created by 123456 on 2018/3/2.
+ * 课表的view
  */
 
 public interface ITimeTableView {

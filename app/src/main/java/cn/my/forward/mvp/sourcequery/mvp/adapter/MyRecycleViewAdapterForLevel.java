@@ -14,7 +14,7 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 
 /**
  * Created by 123456 on 2018/4/3.
- * 考试查询页面的Recycleview的adapter
+ * 等级考试查询页面的Recycleview的adapter
  */
 
 public class MyRecycleViewAdapterForLevel extends RecyclerView

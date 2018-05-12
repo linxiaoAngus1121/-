@@ -14,7 +14,6 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +28,6 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
     private ProgressBar bar;
     private boolean isFirst = true;
-    private RecyclerView mLv;
     private List<String> mlist;
     private MyScoureViewAdapter adapter;
 
@@ -75,7 +73,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
         setContentView(R.layout.activity_scorequery);
         mlist = new ArrayList<>();
         Spinner mSpinner = (Spinner) findViewById(R.id.scoure_query_sp);
-        mLv = (RecyclerView) findViewById(R.id.scoure_data_lv);
+        RecyclerView mLv = (RecyclerView) findViewById(R.id.scoure_data_lv);
         bar = (ProgressBar) findViewById(R.id.scpure_bar);
         String stuNo = getIntent().getStringExtra("stu_no");
         mSpinner.setAdapter(initDataForAdapter(stuNo));
@@ -132,52 +130,11 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
 
     @Override
-    public String getstudNo() {
-        return null;
-    }
-
-    @Override
-    public String getstuPs() {
-        return null;
-    }
-
-    @Override
-    public String getCode() {
-        return null;
-    }
-
-    @Override
-    public void showCode(InputStream inputStream) {
-
-    }
-
-    @Override
-    public void showCodeError(String s) {
-
-    }
-
-    @Override
-    public void showViewStateError(String s) {
-
-    }
-
-    @Override
-    public void showLoginSuccess(String name) {
-    }
-
-    @Override
-    public void showLoginError() {
-    }
-
-    @Override
-    public void closekeyboard() {
-
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         presenter.clearAll();
         presenter = null;
+        mlist = null;
+        adapter = null;
     }
 }

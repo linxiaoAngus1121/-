@@ -4,6 +4,7 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 
 /**
  * Created by 123456 on 2018/5/7.
+ * 个人信息的view
  */
 
 public interface IPersonView {
