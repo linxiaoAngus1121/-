@@ -10,15 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="欢迎你："/>
+        android:text="@string/welcome"/>
 
     <GridView
         android:id="@+id/choise_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
         android:layout_marginTop="30dp"
         android:numColumns="3"
-        android:verticalSpacing="70dp"
+        android:verticalSpacing="90dp"
         />
 
 

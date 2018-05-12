@@ -47,14 +47,21 @@
             />
     </LinearLayout>
 
-    <ListView
+    <!-- <ListView
+         android:id="@+id/scoure_data_lv"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:layout_below="@id/title_ll"
+         android:layout_margin="10dp"
+         android:divider="@color/colorDarkGreen"
+         android:dividerHeight="1dp"
+         android:scrollbars="none"/>-->
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/scoure_data_lv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/title_ll"
         android:layout_margin="10dp"
-        android:divider="@color/colorDarkGreen"
         android:dividerHeight="1dp"
         android:scrollbars="none"/>
-
 </RelativeLayout>

@@ -2,11 +2,14 @@ package cn.my.forward;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -15,7 +18,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.my.forward.mvp.sourcequery.mvp.adapter.MyListViewAdapter;
+import cn.my.forward.mvp.sourcequery.mvp.adapter.MyScoureViewAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 
@@ -26,9 +29,9 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
     private ProgressBar bar;
     private boolean isFirst = true;
-    private ListView mLv;
+    private RecyclerView mLv;
     private List<String> mlist;
-    private MyListViewAdapter adapter;
+    private MyScoureViewAdapter adapter;
 
     /**
      * 生成spinner适配器所需要的数据
@@ -72,7 +75,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
         setContentView(R.layout.activity_scorequery);
         mlist = new ArrayList<>();
         Spinner mSpinner = (Spinner) findViewById(R.id.scoure_query_sp);
-        mLv = (ListView) findViewById(R.id.scoure_data_lv);
+        mLv = (RecyclerView) findViewById(R.id.scoure_data_lv);
         bar = (ProgressBar) findViewById(R.id.scpure_bar);
         String stuNo = getIntent().getStringExtra("stu_no");
         mSpinner.setAdapter(initDataForAdapter(stuNo));
@@ -100,8 +103,13 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
             }
         });
-
-        adapter = new MyListViewAdapter(this, mlist);
+        mLv.setLayoutManager(new LinearLayoutManager(this));
+        //设置分割线颜色
+        DividerItemDecoration divider = new DividerItemDecoration(this, DividerItemDecoration
+                .VERTICAL);
+        divider.setDrawable(ContextCompat.getDrawable(this, R.drawable.recycle_divider));
+        adapter = new MyScoureViewAdapter(this, mlist);
+        mLv.addItemDecoration(divider);
         mLv.setAdapter(adapter);
     }
 

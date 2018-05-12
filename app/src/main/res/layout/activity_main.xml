@@ -83,14 +83,14 @@
 
     </LinearLayout>
 
+    <!--如果设置toleftof属性的话，会导致checkbox在登陆按钮的左边，宽度会出现问题-->
     <CheckBox
         android:id="@+id/activity_main_remberps_cb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/finalto"
-        android:layout_alignStart="@id/content"
         android:layout_below="@id/content"
-        android:layout_toStartOf="@id/finalto"
+        android:layout_marginStart="15dp"
         android:button="@drawable/check_box_style"
         android:checked="true"
         android:text="@string/remember_ps"/>
