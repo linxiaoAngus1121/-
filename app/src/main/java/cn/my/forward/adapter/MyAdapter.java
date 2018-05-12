@@ -20,7 +20,7 @@ import cn.my.forward.R;
 
 public class MyAdapter extends BaseAdapter {
 
-    private String[] title = {"成绩查询", "课表查询", "考试查询", "4，6级", "社团活动", "密码修改", "校园招聘", "火车汽车票",
+    private String[] title = {"成绩查询", "课表查询", "考试查询", "4，6级", "个人信息", "密码修改", "校园招聘", "火车汽车票",
             "景点门票"
     };
     private List<Drawable> picture = new ArrayList<>();
@@ -62,7 +62,7 @@ public class MyAdapter extends BaseAdapter {
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = from.inflate(R.layout.adapter_grid_item, parent, false);
-            holder.mTextView = (TextView) convertView.findViewById(R.id.grid_item);
+            holder.mTextView = convertView.findViewById(R.id.grid_item);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();

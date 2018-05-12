@@ -51,9 +51,10 @@ public class MyListViewAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
+
         String[] item = (String[]) getItem(position);
         holder.tv_n.setText(item[0]);
-        if (Integer.valueOf(item[1]) < 60) {
+        if (Float.valueOf(item[1]) < 60) {
             holder.tv_s.setTextColor(Color.RED);
             holder.tv_s.setText(item[1]);
         } else {

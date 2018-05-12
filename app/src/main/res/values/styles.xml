@@ -11,4 +11,10 @@
     <style name="myStyle" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorSliver</item>
     </style>
+
+    <style name="progressBar_shape" parent="@android:style/Widget.ProgressBar.Small">
+        <item name="android:indeterminateDrawable">@drawable/progress_circle_shape</item>
+        <item name="android:minWidth">200dp</item>
+        <item name="android:minHeight">200dp</item>
+    </style>
 </resources>

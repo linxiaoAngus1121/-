@@ -26,5 +26,5 @@ public interface ILogin {
 
     void levelQuery(ILevelListener listener);
 
-
+    void personInfomation(IPersonListener listener);
 }

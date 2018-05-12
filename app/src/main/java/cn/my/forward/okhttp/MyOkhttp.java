@@ -83,7 +83,9 @@ public class MyOkhttp {
      */
     public void PostRequest(String url, Map<String, String> map, Callback callback, String... sub) {
         Request request = buildPostRequestBody(url, map, sub);
-        client.newCall(request).enqueue(callback);
+        if (request != null) {
+            client.newCall(request).enqueue(callback);
+        }
     }
 
 
@@ -125,14 +127,17 @@ public class MyOkhttp {
      */
     private Request buildPostRequestBody(String url, Map<String, String> m, String... sub) {
         FormBody formBody = buildBody(sub);
-        Request.Builder post = new Request.Builder().url(url).post(formBody);
-        for (Map.Entry<String, String> stringStringEntry : m.entrySet()) {
-            Map.Entry element = (Map.Entry) stringStringEntry;
-            String strKey = (String) element.getKey();
-            String strObj = (String) element.getValue();
-            post.header(strKey, strObj);
+        if (formBody != null) {
+            Request.Builder post = new Request.Builder().url(url).post(formBody);
+            for (Map.Entry<String, String> stringStringEntry : m.entrySet()) {
+                Map.Entry element = (Map.Entry) stringStringEntry;
+                String strKey = (String) element.getKey();
+                String strObj = (String) element.getValue();
+                post.header(strKey, strObj);
+            }
+            return post.build();
         }
-        return post.build();
+        return null;
     }
 
     /**
@@ -183,7 +188,21 @@ public class MyOkhttp {
      */
     private FormBody buildBody(String... sub) {
         MyLog.i("构建历年成绩查询需要传入的参数" + sub[0] + "viewstate" + sub[1] + "学年" + sub[2] + "学期");
-        if (sub[1].equals("") && sub[2].equals("")) { //历年成绩查询
+       // if (sub[3] != null) {
+            if (sub[1].equals("") && sub[2].equals("") && sub[3].equals("空")) {  //个人信息查询
+                MyLog.i("走了我想要的");
+                return new FormBody.Builder()
+                        .add("__EVENTTARGET", "")
+                        .add("__EVENTARGUMENT", "")
+                        .add("__VIEWSTATE", sub[0])
+                        .add("hidLanguage", "")
+                        .add("ddlXN", "")
+                        .add("ddlXQ", "")
+                        .add("ddl_kcxz", "")
+                        .add("Button1", "成绩统计")
+                        .build();
+          //  }
+        } else if (sub[1].equals("") && sub[2].equals("")) { //历年成绩查询
             return new FormBody.Builder()
                     .add("__EVENTTARGET", "")
                     .add("__EVENTARGUMENT", "")
@@ -195,8 +214,7 @@ public class MyOkhttp {
                     //历年成绩
                     .add("btn_zcj", "历年成绩")
                     .build();
-        }else{
-            //如果sub[1],sub[2]是空的话，那就是历年成绩查询。否则的就是学期成绩
+        } else { //如果sub[1],sub[2]是空的话，那就是历年成绩查询。否则的就是学期成绩
             return new FormBody.Builder()
                     .add("__EVENTTARGET", "")
                     .add("__EVENTARGUMENT", "")
@@ -209,7 +227,6 @@ public class MyOkhttp {
                     .add("btn_xq", "学期成绩")
                     .build();
         }
-
     }
 
 

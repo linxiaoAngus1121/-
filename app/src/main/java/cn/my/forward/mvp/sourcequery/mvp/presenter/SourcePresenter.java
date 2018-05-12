@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
@@ -18,10 +19,13 @@ import cn.my.forward.mvp.sourcequery.mvp.biz.ILevelListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.ILogin;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IOnLoginListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IOnQuerySourceListener;
+import cn.my.forward.mvp.sourcequery.mvp.biz.IPersonListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.ITimeTableListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.SourceAndLoginBiz;
+import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IExamView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILevealView;
+import cn.my.forward.mvp.sourcequery.mvp.view.IPersonView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ITimeTableView;
 
@@ -36,6 +40,7 @@ public class SourcePresenter {
     private ITimeTableView mTableView;
     private IExamView mExamView;
     private ILevealView mLevel;
+    private IPersonView mPerson;
     private Bean_l bean01;
     private Handler mhalder = new Handler(Looper.getMainLooper());  //让handler运行在主线程中
 
@@ -49,6 +54,8 @@ public class SourcePresenter {
             this.mExamView = (IExamView) view;
         } else if (view instanceof ILevealView) {
             mLevel = (ILevealView) view;
+        } else if (view instanceof IPersonView) {
+            mPerson = (IPersonView) view;
         } else {
             try {
                 throw new Exception("大哥，你错了");
@@ -58,6 +65,9 @@ public class SourcePresenter {
         }
     }
 
+    /**
+     * 等级考试查询
+     */
     public void LevelQuery() {
         sourceQuery.levelQuery(new ILevelListener() {
             @Override
@@ -82,7 +92,40 @@ public class SourcePresenter {
         });
     }
 
+    /**
+     * 个人信息
+     */
+    public void person() {
+        mPerson.loading();
+        sourceQuery.personInfomation(new IPersonListener() {
+            @Override
+            public void onPersonQuerySuccess(final BeanPerson person) {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPerson.showData(person);
+                    }
+                });
+            }
 
+            @Override
+            public void onPersonQueryError() {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPerson.showDataError();
+                    }
+                });
+            }
+        });
+    }
+
+
+    /**
+     * 考试查询
+     *
+     * @param postion 第几年第几个学期
+     */
     public void examQuery(String postion) {
         sourceQuery.examQuery(postion, new IExamListener() {
             @Override
@@ -122,6 +165,7 @@ public class SourcePresenter {
                         view.showCode(inputStream);
                     }
                 });
+
             }
 
 
@@ -134,6 +178,7 @@ public class SourcePresenter {
                         view.showCodeError(s);
                     }
                 });
+
             }
 
             @Override
@@ -144,6 +189,7 @@ public class SourcePresenter {
                         view.showViewStateError(s);
                     }
                 });
+
             }
         });
 
@@ -155,9 +201,7 @@ public class SourcePresenter {
         bean01.setStuNo(view.getstudNo());
         bean01.setStuPs(view.getstuPs());
         bean01.setCode(view.getCode());
-        Log.i("000", bean01.toString());
-
-
+        MyLog.i(bean01.toString());
         sourceQuery.login(bean01, new IOnLoginListener() {
             @Override
             public void OnLoginSuccess(final String name) {
@@ -196,6 +240,7 @@ public class SourcePresenter {
                         view.showSource(strings);
                     }
                 });
+
             }
 
             @Override
@@ -206,14 +251,29 @@ public class SourcePresenter {
                         view.showSourceError(s);
                     }
                 });
+
             }
         });
     }
 
     private ArrayList<String> Bean_sToString(ArrayList<Bean_s> list) {
+        //这里复习下list的知识，因为每次都是在list的尾部进行操作的，所以不会对数组进行copy操作，所以采用list就行，如果要对数据及进行增删较多，用linklist更好。
         ArrayList<String> mlist = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            mlist.add(list.get(i).getClassName() + "空" + list.get(i).getScore());
+        float sum = 0;
+        int size = list.size();
+        if (size > 0) {
+            for (int i = 0; i < size; i++) {
+                try {
+                    sum = Float.parseFloat(list.get(i).getScore()) + sum;
+                    // sum += Integer.parseInt(list.get(i).getScore());
+                } catch (NumberFormatException e) {
+                    sum = 0;
+                }
+                mlist.add(list.get(i).getClassName() + "空" + list.get(i).getScore());
+            }
+            float range = sum / size;
+            mlist.add("平均成绩空" + range);
+            return mlist;
         }
         return mlist;
     }
@@ -244,5 +304,18 @@ public class SourcePresenter {
         });
     }
 
-
+    public void clearAll() {
+        if (view != null) {
+            view = null;
+        }
+        if (mTableView != null) {
+            mTableView = null;
+        }
+        if (mExamView != null) {
+            mExamView = null;
+        }
+        if (mLevel != null) {
+            mLevel = null;
+        }
+    }
 }

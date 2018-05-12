@@ -30,6 +30,8 @@
         </activity>
         <activity android:name=".LevelActivity">
         </activity>
+        <activity android:name=".PersonInformationActivity">
+        </activity>
     </application>
 
 </manifest>

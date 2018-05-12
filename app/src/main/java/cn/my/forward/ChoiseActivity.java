@@ -45,7 +45,8 @@ public class ChoiseActivity extends AppCompatActivity {
                     case 3:
                         mIntent = new Intent(ChoiseActivity.this, LevelActivity.class);
                         break;
-                    case 5:
+                    case 4:
+                        mIntent = new Intent(ChoiseActivity.this, PersonInformationActivity.class);
                     default:
                         break;
                 }

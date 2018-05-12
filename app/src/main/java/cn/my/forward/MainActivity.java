@@ -181,7 +181,9 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        presenter.clearAll();
         presenter = null;
+        finish();
     }
 
 }

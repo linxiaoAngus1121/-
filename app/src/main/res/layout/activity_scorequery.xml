@@ -2,13 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/ac397b4dc104ea430371cd185a7b848d"
+                android:background="@color/colorLavender"
     >
 
     <Spinner
         android:id="@+id/scoure_query_sp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         />
 
     <ProgressBar
@@ -17,32 +17,44 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/title_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/scoure_query_sp">
+        android:layout_below="@id/scoure_query_sp"
+        android:background="@color/colorDarkSalmon">
+
+        <TextView
+            android:id="@+id/text_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/className"/>
+
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:text="@string/subject"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_marginEnd="30dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
             android:text="@string/score"
             />
-    </RelativeLayout>
+    </LinearLayout>
 
     <ListView
         android:id="@+id/scoure_data_lv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/title_ll"/>
+        android:layout_below="@id/title_ll"
+        android:layout_margin="10dp"
+        android:divider="@color/colorDarkGreen"
+        android:dividerHeight="1dp"
+        android:scrollbars="none"/>
 
 </RelativeLayout>

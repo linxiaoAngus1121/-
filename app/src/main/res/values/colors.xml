@@ -9,7 +9,11 @@
     <color name="colorGreen">#808000</color>
     <color name="colorDarkGray">#A9A9A9</color>
     <color name="colorOrign">#f77718</color>
-    <color name="CornflowerBlue">#6495ED</color>
-    <color name="CadetBlue">#5F9EA0</color>
-    <color name="LightSteelBlue">#B0C4DE</color>
+    <color name="colorCornflowerBlue">#6495ED</color>
+    <color name="clolrDarkBlue">#1E90FF</color>
+    <color name="colorCadetBlue">#5F9EA0</color>
+    <color name="colorLightSteelBlue">#B0C4DE</color>
+    <color name="colorDarkSalmon">#E9967A</color>
+    <color name="colorLavender">#E6E6FA</color>
+    <color name="colorDarkGreen">#f9b68b</color>
 </resources>

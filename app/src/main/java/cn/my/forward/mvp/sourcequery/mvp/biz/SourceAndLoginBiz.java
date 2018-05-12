@@ -1,5 +1,7 @@
 package cn.my.forward.mvp.sourcequery.mvp.biz;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -18,8 +20,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
@@ -44,7 +48,9 @@ public class SourceAndLoginBiz implements ILogin {
     private ArrayList<Bean_s> list = new ArrayList<>();     //存放成绩的list
     private Bean_l bean;
     private static SourceAndLoginBiz mInstance;
-    private String viewState;
+    private String viewState;   //考试查询的viewstate
+    private String viewStateForPerson;   //个人信息查询的viewstate（即成绩查询中的成绩统计）
+    private boolean flag = false;    //判断是否是个人信息查询的标志位
 
     private SourceAndLoginBiz() {
 
@@ -78,7 +84,7 @@ public class SourceAndLoginBiz implements ILogin {
 
     @Override
     public void score(String year, IOnQuerySourceListener querySourceListener) {
-        toGradeQurry(year, bean, querySourceListener);
+        toGradeQurry(year, bean, querySourceListener, null);
     }
 
     @Override
@@ -128,6 +134,17 @@ public class SourceAndLoginBiz implements ILogin {
                 getLevelData(response.body().byteStream(), url, listener);
             }
         });
+    }
+
+    @Override
+    public void personInfomation(IPersonListener listener) {
+        GetPersonData(listener);
+    }
+
+    private void GetPersonData(IPersonListener listener) {
+        flag = true;
+        this.toGradeQurry("", bean, null, listener);//这里就保证了取到viewStateForPerson
+
     }
 
 
@@ -799,10 +816,15 @@ public class SourceAndLoginBiz implements ILogin {
      * @param year                包含学年学期信息
      * @param bean                实体类
      * @param querySourceListener 成绩查询回调
+     * @param listener            个人信息回调
      */
 
-    private void toGradeQurry(final String year, final Bean_l bean, final IOnQuerySourceListener
-            querySourceListener) {
+    private void toGradeQurry(final String year, @Nullable final Bean_l bean, final
+    IOnQuerySourceListener
+            querySourceListener, final IPersonListener listener) {
+        if (bean.getCookies() == null) {
+            return;
+        }
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
         map.put("Connection", " Keep-Alive");
@@ -814,7 +836,9 @@ public class SourceAndLoginBiz implements ILogin {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.i("000", e.toString() + "成绩失败了");
-                querySourceListener.OnError(e.toString());
+                if (querySourceListener != null) {
+                    querySourceListener.OnError(e.toString());
+                }
             }
 
             @Override
@@ -844,25 +868,153 @@ public class SourceAndLoginBiz implements ILogin {
                     String[] split1 = split[1].split("\"", 2);//继续splite
                     //   Log.i("000", split1[0] + "这是0的部分+++++");    //最终需要的
                     //   Log.i("000", split1[1] + "这是1的部分+++++");
-                    substring = split1[0];
-                    if (year.equals("")) {   //默认开始历年成绩查询
-                        pastScouce(bean, substring, "", "", querySourceListener);
-                    } else if (year.equals("历年成绩")) {  //选择的是历年成绩查询拿一项
-                        pastScouce(bean, substring, "", "", querySourceListener);
-                    } else {
-                        StringBuilder builder = new StringBuilder(year);
-                        String[] s = new String[5];
-                        int index = builder.lastIndexOf("-");
-                        s[0] = builder.substring(0, index);//年
-                        s[1] = builder.substring(index + 1);//学期
-                        MyLog.i(s[0] + s[1] + "这即使数据");
-                        pastScouce(bean, substring, s[0], s[1], querySourceListener);
+                    viewStateForPerson = split1[0];      //这个就是页面的viewstate
+                    if (flag) {
+                        flag = false;
+                        if (listener != null) {
+                            pastScouce(bean, viewStateForPerson, listener);
+                        }
+                        return;
+                    }
+                    switch (year) {
+                        case "":    //默认开始历年成绩查询
+                            pastScouce(bean, viewStateForPerson, "", "", querySourceListener);
+                            break;
+                        case "历年成绩":   //选择的是历年成绩查询拿一项
+                            pastScouce(bean, viewStateForPerson, "", "", querySourceListener);
+                            break;
+                        default:
+                            StringBuilder builder = new StringBuilder(year);
+                            String[] s = new String[5];
+                            int index = builder.lastIndexOf("-");
+                            s[0] = builder.substring(0, index);//年
+                            s[1] = builder.substring(index + 1);//学期
+                            MyLog.i(s[0] + s[1] + "这是学期学年数据");
+                            pastScouce(bean, viewStateForPerson, s[0], s[1], querySourceListener);
+                            break;
                     }
                 }
             }
         });
     }
 
+    private void pastScouce(Bean_l bean, final String substring1, final IPersonListener
+            personListener) {
+        String utf8Togb2312 = utf8Togb2312(stuName);
+        final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
+                "&xm=" + stuName + "&gnmkdm=N121605";
+        Log.i("000", url);
+        Map<String, String> map = new HashMap<>();
+        map.put("Cookie", bean.getCookies());
+        map.put("Connection", " Keep-Alive");
+        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
+                " like Gecko");
+        map.put("Referer", "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo()
+                + "&xm=" + utf8Togb2312 + "&gnmkdm=N121605");
+        map.put("Content-Type", "application/x-www-form-urlencoded");
+        map.put("Accept", "text/html, application/xhtml+xml, image/jxr, */*");
+        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        instance.PostRequest(url, map, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (personListener != null) {
+                    personListener.onPersonQueryError();
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() == 200) {
+                    InputStream inputStream = response.body().byteStream(); //正确的，可以进行数据裁剪
+                    Document document = Jsoup.parse(inputStream, "gb2312", url);
+                    BeanPerson person = getPerson(document);
+                    if (personListener != null) {
+                        if (person != null) {
+                            personListener.onPersonQuerySuccess(person);
+                        }
+                    }
+                }
+            }
+        }, substring1, "", "", "空");
+    }
+
+    private BeanPerson getPerson(Document document) {
+        BeanPerson person = new BeanPerson();
+        Element element = document.select("#lbl_xh").first();       //学号
+        if (element != null) {
+            String s = element.text();
+            person.setId(sq(s));
+        }
+        Element elements1 = document.select("#lbl_xm").first();     //姓名
+        if (elements1 != null) {
+            String nem = elements1.text();
+
+            person.setName(sq(nem));
+        }
+        Element elements3 = document.select("#lbl_zymc").first();       //专业
+        if (elements3 != null) {
+            person.setMajor(elements3.text());
+        }
+        Element elements4 = document.select("#lbl_zyfx").first();       //专业方向
+        if (elements4 != null) {
+            String[] split = elements4.text().split(":");
+            person.setOrientation(split[1]);
+        }
+        Element elements5 = document.select("#lbl_xzb").first();    //班级
+        if (elements5 != null) {
+            String nem = elements5.text();
+            person.setTheClass(sq(nem));
+        }
+        Element elements6 = document.select("#xftj").first();
+        Element elements7 = document.select("#pjxfjd").first();
+        Element elements8 = document.select("#zyzrs").first();
+        //  '所选学分120；获得学分118；重修学分0；正考未通过学分 2。',
+        if (elements6 != null && elements7 != null && elements8 != null) {
+            String builder = elements6.text() + "；" + elements7.text() + "；" +
+                    elements8.text();
+            String repickStr = parse(builder);
+            String[] split = repickStr.split("；");
+            MyLog.i(repickStr);
+            List<Float> list = new ArrayList<>();
+            try {
+                list.add(Float.valueOf(split[0].trim()));
+                list.add(Float.valueOf(split[1].trim()));
+                list.add(Float.valueOf(split[2].trim()));
+                list.add(Float.valueOf(split[3].trim()));
+                list.add(Float.valueOf(split[4].trim()));
+                list.add(Float.valueOf(split[5].trim()));
+            } catch (NumberFormatException e) {    //出错了，让他默认都是0
+                list.clear();
+                for (int i = 0; i < 4; i++) {
+                    list.add(0f);
+                }
+            }
+            person.setList(list);
+        }
+        return person;
+    }
+
+    /**
+     * 去掉不必要的汉字
+     *
+     * @param text 要出除的字符串
+     * @return 返回一个新的字符串
+     */
+    private String parse(String text) {
+        String reg = "[\\u4e00-\\u9fa5。：\\s+]";     //去掉汉字和中文的。：
+        Pattern pat = Pattern.compile(reg);
+        Matcher mat = pat.matcher(text);
+        return mat.replaceAll("");
+    }
+
+
+    private String sq(String s) {
+       /* for (String s1 : s.split("：")) {
+            MyLog.i(s1);
+        }*/
+        String[] split = s.split("：");
+        return split[1];
+    }
 
     /**
      * 成绩查询
@@ -897,27 +1049,16 @@ public class SourceAndLoginBiz implements ILogin {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, @NonNull Response response) throws IOException {
                 if (response.code() == 200) {
-                    //       parseToFile(response.body().byteStream());
-                    String cast = cast(response.body().byteStream());
-                 /*   if (substring.equals("") || s.equals("")) {
-                        Log.i("000", "查询成绩成功");
-                        if (cast == null) {
-                            querySourceListener.OnError("查询成绩时发生未知错误");
-                            return;
-                        }
+                    if (response.body().byteStream() != null) {
+                        String cast = cast(response.body().byteStream());
                         finalCast(cast);
                         querySourceListener.OnQuerySuccess(list);
-                    } else {
-                        //这里执行的是有学期的
-                        MyLog.i("走了另外一个方法");
-                    }*/
-                    finalCast(cast);
-                    querySourceListener.OnQuerySuccess(list);
+                    }
                 }
             }
-        }, substring1, s, substring);
+        }, substring1, s, substring, "");
     }
 
 
@@ -929,6 +1070,9 @@ public class SourceAndLoginBiz implements ILogin {
     private void finalCast(String cast) {
         if (list.size() > 0) { //这里返回的数据要先清除，不然会由于单例而造成的数据错乱
             list.clear();
+        }
+        if (cast == null) {
+            return;
         }
         StringBuilder builder = new StringBuilder(cast);
         int indexOf = builder.indexOf("<tr>");
@@ -1012,7 +1156,7 @@ public class SourceAndLoginBiz implements ILogin {
             MyLog.i(substring + "成绩成绩");
             return substring;
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         } finally {
             try {
                 inputStream.close();
@@ -1020,7 +1164,6 @@ public class SourceAndLoginBiz implements ILogin {
                 e.printStackTrace();
             }
         }
-        return null;
     }
 
     /**
@@ -1040,11 +1183,11 @@ public class SourceAndLoginBiz implements ILogin {
         int i = 0;
         for (byte b : bytes) {//循环数组
             String s = Integer.toHexString(b);//再用Integer中的方法，把每个byte转换成16进制输出
-            Log.i("000", s);
+            MyLog.i(s);
             String substring = s.substring(6, 8).toUpperCase();//可以了
             a[i] = substring;
             i++;
-            Log.i("000", substring);
+            MyLog.i(substring);
 /*
             输出示例
             ffffffc2

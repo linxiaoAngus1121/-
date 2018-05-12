@@ -169,6 +169,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        presenter.clearAll();
         presenter = null;
     }
 }

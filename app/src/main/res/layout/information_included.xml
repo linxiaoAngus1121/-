@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/table"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_below="@id/column_chart"
+    android:layout_margin="15dp">
+
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBlack">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_weight="1"
+            android:background="@color/colorWhile"
+            android:gravity="center"
+            android:text="@string/name"
+            android:textColor="@color/colorBlack"
+            />
+
+        <TextView
+            android:id="@+id/delivercompanyname"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_weight="1.5"
+            android:background="@color/colorWhile"
+            android:gravity="center"
+            android:text="@string/studentnumber"
+            android:textColor="@color/colorBlack"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_weight="1"
+            android:background="@color/colorWhile"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="@string/major"
+            android:textColor="@color/colorBlack"
+            />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginEnd="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_weight="1"
+            android:background="@color/colorWhile"
+            android:ellipsize="marquee"
+            android:gravity="center"
+            android:text="@string/orientation"
+            android:textColor="@color/colorBlack"/>
+    </TableRow>
+
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBlack">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_weight="1"
+            android:background="@color/colorWhile"
+            android:gravity="center"
+            android:padding="6dp"
+            android:textColor="@color/colorBlack"
+            />
+
+        <TextView
+            android:id="@+id/number"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_weight="1.5"
+            android:background="@color/colorWhile"
+            android:gravity="center"
+            android:padding="6dp"
+            android:textColor="@color/colorBlack"
+            />
+
+        <TextView
+            android:id="@+id/fdjh"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_weight="1"
+            android:background="@color/colorWhile"
+            android:ellipsize="marquee"
+            android:gravity="center"
+            android:textColor="@color/colorBlack"/>
+
+        <TextView
+            android:id="@+id/orientation"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginEnd="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_weight="1"
+            android:background="@color/colorWhile"
+            android:ellipsize="marquee"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:textColor="@color/colorBlack"/>
+    </TableRow>
+
+</TableLayout>

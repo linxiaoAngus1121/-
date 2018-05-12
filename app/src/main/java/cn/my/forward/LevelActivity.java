@@ -54,4 +54,5 @@ public class LevelActivity extends AppCompatActivity implements ILevealView {
         }
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
+
 }

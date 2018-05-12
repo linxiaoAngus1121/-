@@ -53,8 +53,8 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        presenter.clearAll();
         presenter = null;
-        finish();
     }
 
     /**
