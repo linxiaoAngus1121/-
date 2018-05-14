@@ -19,6 +19,7 @@
         android:layout_height="100dp"
         android:layout_weight="1"
         android:gravity="center"
+        android:textIsSelectable="true"
         android:textSize="15sp"/>
 
 

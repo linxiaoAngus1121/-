@@ -3,13 +3,13 @@ package cn.my.forward.mvp.sourcequery.mvp.biz;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.jsoup.select.Selector;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
-import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.TimeTableBean;
@@ -36,6 +35,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
 import okhttp3.Response;
+import static android.util.Log.i;
 
 /**
  * Created by 123456 on 2018/2/9.
@@ -45,12 +45,13 @@ import okhttp3.Response;
 public class SourceAndLoginBiz implements ILogin {
     private String stuName; //学生的名字
     private MyOkhttp instance = MyOkhttp.getInstance();     //单例实现
-    private ArrayList<Bean_s> list = new ArrayList<>();     //存放成绩的list
+    private ArrayList<String> list = new ArrayList<>();     //存放成绩的list
     private Bean_l bean;
     private static SourceAndLoginBiz mInstance;
     private String viewState;   //考试查询的viewstate
     private String viewStateForPerson;   //个人信息查询的viewstate（即成绩查询中的成绩统计）
     private boolean flag = false;    //判断是否是个人信息查询的标志位
+
 
     private SourceAndLoginBiz() {
 
@@ -107,7 +108,8 @@ public class SourceAndLoginBiz implements ILogin {
     public void levelQuery(final ILevelListener listener) {
         final String url = "http://jwxt.sontan.net/xsdjkscx.aspx?xh=" + bean.getStuNo() + "&xm=" +
                 stuName + "&gnmkdm=N121606";
-        Log.i("000", url);
+        MyLog.i(url);
+        //这里考虑使用SparseArray，但是SparseArray的key不可为stringx,所以用不了
         Map<String, String> map = new HashMap<>();
         map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;" +
                 "q=0.8");
@@ -164,7 +166,7 @@ public class SourceAndLoginBiz implements ILogin {
             Document document = Jsoup.parse(inputStream, "gb2312", url);
             Elements table = document.select("table tr:not(.datelisthead)");
             ArrayList<LevelBean> been = new ArrayList<>();
-            Log.i("000", table.size() + "");
+            MyLog.i(table.size() + "");
             for (Element the : table) {
                 Elements td = the.select("td");
                 LevelBean bean = new LevelBean(td.get(2).text() + "      ", td.get(3).text(), td.get
@@ -209,7 +211,7 @@ public class SourceAndLoginBiz implements ILogin {
         instance.PostExamRequest(url, viewState, s, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i("000", e.toString());
+                MyLog.i(e.toString());
                 listener.showExamError("嗷了个嗷，出错了");
             }
 
@@ -327,7 +329,7 @@ public class SourceAndLoginBiz implements ILogin {
         instance.GetRequest("http://jwxt.sontan.net/", new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i("000", e.toString());
+                MyLog.i(e.toString());
                 listener.getViewStateError(e.toString());
             }
 
@@ -346,19 +348,19 @@ public class SourceAndLoginBiz implements ILogin {
                             int indexOf = values.get(0).indexOf(";");
                             String substring = values.get(0).substring(0, indexOf);
                             routeid = substring + ";";
-                            Log.i("000", routeid + "截取了乐乐乐乐乐乐");
+                            MyLog.i(routeid + "截取了乐乐乐乐乐乐");
                         } else {
                             int indexOf = values.get(1).indexOf(";");
                             session_id = values.get(1).substring(0, indexOf);
                             session_id = session_id + ";";
-                            Log.i("000", session_id + "sessionid");
+                            MyLog.i(session_id + "sessionid");
                         }
                     }
                     String finalcookies = routeid + session_id;
                     bean.setCookies(finalcookies);
-                    Log.i("000", finalcookies);
+                    MyLog.i(finalcookies);
                     String substring = string.substring(2282, 2302);
-                    Log.i("000", substring + "截取后的__VIEWSTATE");
+                    MyLog.i(substring + "截取后的__VIEWSTATE");
                     bean.setViewState(substring);
                     viewState = substring;
                     getpic(bean, listener);
@@ -382,7 +384,7 @@ public class SourceAndLoginBiz implements ILogin {
         instance.GetRequest("http://jwxt.sontan.net/CheckCode.aspx", map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i("000", e.toString() + "获取验证码失败了");
+                i("000", e.toString() + "获取验证码失败了");
                 listener.getCodeFailure(e.toString());
             }
 
@@ -414,40 +416,45 @@ public class SourceAndLoginBiz implements ILogin {
         map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
                 " like Gecko");
         map.put("Content-Length", "230");
-        instance.PostRequest("http://jwxt.sontan.net/Default2.aspx", bean, map, new Callback() {
+        final String url = "http://jwxt.sontan.net/Default2.aspx";
+        instance.PostRequest(url, bean, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i("000", e.toString() + "嘎嘎嘎嘎嘎嘎嘎嘎嘎");
-                listener.OnLoginError(e.toString());
+                MyLog.i(e.toString() + "嘎嘎嘎嘎嘎嘎嘎嘎嘎");
+                if (listener != null) {
+                    listener.OnLoginError(e.toString());
+                }
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 //这里不应全部读取，当读取到同学的时候，应该停止读取了
                 if (response.code() != 200) {
-                    listener.OnLoginError(response.message());
+                    if (listener != null) {
+                        listener.OnLoginError(response.message());
+                    }
                     return;
                 }
-                InputStream inputStream = response.body().byteStream();
-                //网页上采取的是gb2312格式，所以这里要采用一致的才不会乱码
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
-                        "gb2312"));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                int indexOf;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                    indexOf = sb.indexOf("同学");
-                    if (indexOf != -1) {   //找到了
-                        Log.i("000", "找到了");
-                        Log.i("000", sb.toString());
-                        stuName = getstName(sb.toString(), indexOf);
-                        listener.OnLoginSuccess(stuName);
-                        return;
+                Document document = Jsoup.parse(response.body().byteStream(), "gb2312", url);
+                try {
+                    Element element = document.select("span#xhxm").first();
+                    if (element != null) {
+                        stuName = element.text();
+                    } else {
+                        if (listener != null) {
+                            listener.OnLoginError("开了会小差，出错了");
+                        }
+                    }
+                } catch (Selector.SelectorParseException e) {
+                    if (listener != null) {
+                        listener.OnLoginError("开了会小差，出错了");
                     }
                 }
-                listener.OnLoginError("开了会小差，出错了");
-
+                if (listener != null && stuName != null) {
+                    listener.OnLoginSuccess(stuName);
+                } else if (listener != null) {
+                    listener.OnLoginError("开了会小差，出错了");
+                }
             }
         });
     }
@@ -476,13 +483,17 @@ public class SourceAndLoginBiz implements ILogin {
         instance.GetRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                listener.QuertTimeTableFailure(e.toString());
+                if (listener != null) {
+                    listener.QuertTimeTableFailure(e.toString());
+                }
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() != 200) {
-                    listener.QuertTimeTableFailure("课表查询出错");
+                    if (listener != null) {
+                        listener.QuertTimeTableFailure("课表查询出错");
+                    }
                     return;
                 }
                 MyLog.i("请求成功");
@@ -491,9 +502,13 @@ public class SourceAndLoginBiz implements ILogin {
                     List<TimeTableBean> list = JsoupMethod(streamtoString);
                     ArrayList xuanke = CoursePages.xuanke(list);
                     ArrayList tempal2 = (ArrayList) xuanke.get(start);
-                    listener.QueryTimeTableSuccess(tempal2);
+                    if (listener != null) {
+                        listener.QueryTimeTableSuccess(tempal2);
+                    }
                 } else {
-                    listener.QuertTimeTableFailure("课表解析出错");
+                    if (listener != null) {
+                        listener.QuertTimeTableFailure("课表解析出错");
+                    }
                 }
             }
         });
@@ -511,7 +526,7 @@ public class SourceAndLoginBiz implements ILogin {
         Elements elements = parse.select("table.blacktab");
         List<Node> nodes = elements.get(0).childNode(1).childNodes();
         //这个list就放有我需要的课表信息
-        Log.i("000", nodes.size() + "size");
+        i("000", nodes.size() + "size");
         ArrayList<Node> need = new ArrayList<>();
         int size = nodes.size();
         for (int i = 1; i < size - 1; i++) {
@@ -822,53 +837,57 @@ public class SourceAndLoginBiz implements ILogin {
     private void toGradeQurry(final String year, @Nullable final Bean_l bean, final
     IOnQuerySourceListener
             querySourceListener, final IPersonListener listener) {
-        if (bean.getCookies() == null) {
-            return;
-        }
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
         map.put("Connection", " Keep-Alive");
         map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
                 " like Gecko");
         map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
-        instance.GetRequest("http://jwxt.sontan.net/xscjcx.aspx?xh=" +
-                bean.getStuNo() + "&xm=学生&gnmkdm=N121605", map, new Callback() {
+        final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" +
+                bean.getStuNo() + "&xm=学生&gnmkdm=N121605";
+        instance.GetRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i("000", e.toString() + "成绩失败了");
+                i("000", e.toString() + "成绩失败了");
                 if (querySourceListener != null) {
                     querySourceListener.OnError(e.toString());
                 }
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.code() == 200) {
                     MyLog.i("进入成绩成功了");
                     //接下来点击历年成绩，但是首先要去获取到页面上的__VIEWSTATE
                     InputStream inputStream = response.body().byteStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    int indexOf = -1;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
-                        indexOf = sb.indexOf("__VIEWSTATE\" value=");
-                        if (indexOf != -1) {   //找到了
-                            Log.i("000", "找到了");
-                            Log.i("000", sb.toString());
-                            break;
+                    if (inputStream == null) {
+                        return;
+                    }
+                    Document document;
+                    try {
+                        document = Jsoup.parse(inputStream, "gb2312", url);
+                        Element element = document.select("form#Form1").first();
+                        if (element != null) {
+                            viewStateForPerson = element.select("input").get(2).val();
+                        } else {
+                            if (querySourceListener != null) {
+                                querySourceListener.OnError("好像出了点问题");
+                            }
+                        }
+                    } catch (IOException e) {
+                        if (querySourceListener != null) {
+                            querySourceListener.OnError("好像出了点问题");
+                        }
+                    } finally {
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+
                         }
                     }
-                    //substring这里是最终需要的__VIEWSTATE
-                    String substring = sb.toString().substring(indexOf);
-                    String[] split = substring.split("value=\"", 2);
-                    //   Log.i("000", split[0] + "这是0的部分");
-                    //  Log.i("000", split[1] + "这是1的部分");  //取1这一部分
-                    String[] split1 = split[1].split("\"", 2);//继续splite
-                    //   Log.i("000", split1[0] + "这是0的部分+++++");    //最终需要的
-                    //   Log.i("000", split1[1] + "这是1的部分+++++");
-                    viewStateForPerson = split1[0];      //这个就是页面的viewstate
+
+
                     if (flag) {
                         flag = false;
                         if (listener != null) {
@@ -903,7 +922,7 @@ public class SourceAndLoginBiz implements ILogin {
         String utf8Togb2312 = utf8Togb2312(stuName);
         final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
                 "&xm=" + stuName + "&gnmkdm=N121605";
-        Log.i("000", url);
+        i("000", url);
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
         map.put("Connection", " Keep-Alive");
@@ -923,16 +942,31 @@ public class SourceAndLoginBiz implements ILogin {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.code() == 200) {
                     InputStream inputStream = response.body().byteStream(); //正确的，可以进行数据裁剪
-                    Document document = Jsoup.parse(inputStream, "gb2312", url);
-                    BeanPerson person = getPerson(document);
-                    if (personListener != null) {
-                        if (person != null) {
-                            personListener.onPersonQuerySuccess(person);
+                    Document document;
+                    try {
+                        document = Jsoup.parse(inputStream, "gb2312", url);
+                        BeanPerson person = getPerson(document);
+                        if (personListener != null) {
+                            if (person != null) {
+                                personListener.onPersonQuerySuccess(person);
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            if (inputStream != null) {
+                                inputStream.close();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
+
+
                 }
             }
         }, substring1, "", "", "空");
@@ -1007,11 +1041,13 @@ public class SourceAndLoginBiz implements ILogin {
         return mat.replaceAll("");
     }
 
-
+    /**
+     * 对传过来的数据进行中文符号：的分割
+     *
+     * @param s 源字符串
+     * @return 返回分割后的字符串[1]
+     */
     private String sq(String s) {
-       /* for (String s1 : s.split("：")) {
-            MyLog.i(s1);
-        }*/
         String[] split = s.split("：");
         return split[1];
     }
@@ -1027,9 +1063,9 @@ public class SourceAndLoginBiz implements ILogin {
      */
     private void pastScouce(Bean_l bean, final String substring1, final String s, final String
             substring, final IOnQuerySourceListener querySourceListener) {
-        String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
+        final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
                 "&xm=" + stuName + "&gnmkdm=N121605";
-        Log.i("000", url);
+        i("000", url);
         String utf8Togb2312 = utf8Togb2312(stuName);
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
@@ -1045,16 +1081,22 @@ public class SourceAndLoginBiz implements ILogin {
             @Override
             public void onFailure(Call call, IOException e) {
                 MyLog.i(e.getMessage() + "查询成绩失败");
-                querySourceListener.OnError(e.toString());
+                if (querySourceListener != null) {
+                    querySourceListener.OnError(e.toString());
+                }
+
             }
 
             @Override
-            public void onResponse(Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws
+                    IOException {
                 if (response.code() == 200) {
                     if (response.body().byteStream() != null) {
-                        String cast = cast(response.body().byteStream());
-                        finalCast(cast);
-                        querySourceListener.OnQuerySuccess(list);
+                        //fialcast()                                    老方法
+                        cast(response.body().byteStream(), url);      //改进方法
+                        if (querySourceListener != null) {
+                            querySourceListener.OnQuerySuccess(list);
+                        }
                     }
                 }
             }
@@ -1063,100 +1105,39 @@ public class SourceAndLoginBiz implements ILogin {
 
 
     /**
-     * 最终裁剪数据
-     *
-     * @param cast 数据源
-     */
-    private void finalCast(String cast) {
-        if (list.size() > 0) { //这里返回的数据要先清除，不然会由于单例而造成的数据错乱
-            list.clear();
-        }
-        if (cast == null) {
-            return;
-        }
-        StringBuilder builder = new StringBuilder(cast);
-        int indexOf = builder.indexOf("<tr>");
-        if (indexOf == -1) {    //为空的情况下
-            return;
-        }
-        String substring = builder.substring(indexOf, builder.length());
-        Log.i("000", substring + "substring++++++++");
-        //还需要对数据进行裁剪
-        docast(substring);
-    }
-
-    /**
-     * 最终执行的方法
-     *
-     * @param substring 最初的字符串
-     */
-    private void docast(String substring) {
-        if (substring.isEmpty() || !substring.contains("<td>")) {   //字符串是空或者已经没有<td>了，直接return
-            return;
-        }
-        StringBuilder sb = new StringBuilder(substring);
-        int indexOf = 0;
-        String className = null;
-        String source = null;
-        for (int i = 1; i <= 9; i++) {
-            indexOf = sb.indexOf("<td>", indexOf);
-            if (indexOf == -1) {                             //没有找到<td>了
-                return;
-            }
-            indexOf = indexOf + 1;  //让indexof+1,从下一位置开始
-            if (i == 4) {                                   //第四个<td>是课程名字
-                String local = sb.substring(indexOf + 3);   //去掉td>
-                int i1 = local.indexOf("</td>");            //获取到课程名字的结束标签</td>
-                className = local.substring(0, i1);         //截取出姓名
-                //    Log.i("000", className + "课程名字");       //正确
-            }
-            if (i == 9) {                                    //第九个<td>是分数
-                String local = sb.substring(indexOf + 3);   //同上
-                int i1 = local.indexOf("</td>");            //同上
-                source = local.substring(0, i1);            //同上
-                //   Log.i("000", source + "分数是");           //正确
-
-            }
-        }
-        Bean_s bean_s = new Bean_s(className, source);      //放入实体类对象中
-        list.add(bean_s);
-        String s = sb.substring(indexOf - 1);               //因为上面最后一个会+1，所以这里-1
-        //   Log.i("000", "截取后的" + s);
-        int i2 = s.indexOf("<tr");                          //应该跳到下一个<tr 出现的位置
-        if (i2 == -1) {                                     //防止出现数组越界
-            return;
-        }
-        String substring1 = s.substring(i2, s.length());     //下一个即将被截取的字符串
-        //  Log.i("000", "下一个要进行截取的" + substring1);
-        this.docast(substring1);                             //重新执行一遍，再查找下一个成绩
-    }
-
-
-    /**
-     * 将inputestream截取inputstream中的信息，只读取我们需要的信息.
+     * 进行数据的解析工作,调用jsoup库
      *
      * @param inputStream inputstream
-     * @return 返回包含成绩的字符串, 但是还需要进一步截取
+     * @param url         jsoup需要的url
      */
-    private String cast(InputStream inputStream) {
+    private void cast(InputStream inputStream, String url) {
         try {
-            StringBuilder sb = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
-                    "gb2312"));
-            String line;
-            int num = 0;
-            while ((line = reader.readLine()) != null) {
-                if ((num = sb.indexOf("align=\"left\"")) != -1) {   //出现这个字符串，那就不要再读了
-                    break;
-                }
-                sb.append(line);
+            if (list.size() > 0) {
+                list.clear();
             }
-            int i = sb.lastIndexOf("datelisthead");
-            String substring = sb.substring(i, num);
-            MyLog.i(substring + "成绩成绩");
-            return substring;
+            if (inputStream == null) {
+                return;
+            }
+            Document document = Jsoup.parse(inputStream, "gb2312", url);
+            Element element = document.select("table.datelist").first();
+            //取出所有的<tr>标签数量，注意这时的数据已经是datalist里面的了，即正确的
+            int size = element.select("tr").size();
+            Elements elements = element.select("tr");
+            float sum = 0;                      //平均分
+            int score_count = size - 1;         //课程总数
+            if (score_count == 0) {
+                return;
+            }
+            for (int i = 1; i < size; i++) {    //第一个tr不是我们想要的，下标是0
+                String name = elements.get(i).select("tr").select("td").get(3).text();   //课程名
+                String score = elements.get(i).select("tr").select("td").get(8).text();   //成绩
+                sum = Float.valueOf(score) + sum;
+                list.add(name + "空" + score);
+            }
+            float range = sum / score_count;
+            list.add("平均成绩空" + range);
         } catch (Exception e) {
-            return null;
+            list.clear();
         } finally {
             try {
                 inputStream.close();
@@ -1164,6 +1145,7 @@ public class SourceAndLoginBiz implements ILogin {
                 e.printStackTrace();
             }
         }
+
     }
 
     /**
@@ -1209,21 +1191,6 @@ public class SourceAndLoginBiz implements ILogin {
         MyLog.i(builder.toString() + "拼接完成");
 
         return builder.toString();
-    }
-
-
-    /**
-     * 获取学生的姓名
-     *
-     * @param s       爬取到网页上的数据
-     * @param indexOf 出现了同学两个字的位置
-     * @return 返回学生的姓名
-     */
-    private String getstName(String s, int indexOf) {
-        int i = s.indexOf("\"xhxm\">");
-        String substring = s.substring(i + 7, indexOf);
-        Log.i("000", substring + "截取到的名字");
-        return substring;
     }
 
 

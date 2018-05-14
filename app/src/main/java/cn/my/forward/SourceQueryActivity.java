@@ -19,6 +19,7 @@ import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyScoureViewAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
+import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 
 public class SourceQueryActivity extends AppCompatActivity implements ISourceView {
@@ -132,6 +133,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        MyLog.i("走了成绩查询的destroy");
         presenter.clearAll();
         presenter = null;
         mlist = null;

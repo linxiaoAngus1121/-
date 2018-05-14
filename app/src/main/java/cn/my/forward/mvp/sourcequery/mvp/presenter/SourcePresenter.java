@@ -2,7 +2,6 @@ package cn.my.forward.mvp.sourcequery.mvp.presenter;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
-import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_s;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IExamListener;
@@ -79,7 +77,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mLevel.showLevelData(been);
+                        if (mLevel != null) {
+                            mLevel.showLevelData(been);
+                        }
                     }
                 });
             }
@@ -89,7 +89,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mLevel.showLevelDataError(s);
+                        if (mLevel != null) {
+                            mLevel.showLevelDataError(s);
+                        }
                     }
                 });
             }
@@ -107,7 +109,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mPerson.showData(person);
+                        if (mPerson != null) {
+                            mPerson.showData(person);
+                        }
                     }
                 });
             }
@@ -117,7 +121,10 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mPerson.showDataError();
+                        if (mPerson != null) {
+                            mPerson.showDataError();
+                        }
+
                     }
                 });
             }
@@ -137,7 +144,11 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mExamView.showExam(list);
+                        if (mExamView != null) {
+                            mExamView.showExam(list);
+                        }
+
+
                     }
                 });
             }
@@ -147,7 +158,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mExamView.showError(s);
+                        if (mExamView != null) {
+                            mExamView.showError(s);
+                        }
                     }
                 });
             }
@@ -166,7 +179,10 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mLoginView.showCode(inputStream);
+                        if (mLoginView != null) {
+                            mLoginView.showCode(inputStream);
+                        }
+
                     }
                 });
 
@@ -179,7 +195,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mLoginView.showCodeError(s);
+                        if (mLoginView != null) {
+                            mLoginView.showCodeError(s);
+                        }
                     }
                 });
 
@@ -190,7 +208,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mLoginView.showViewStateError(s);
+                        if (mLoginView != null) {
+                            mLoginView.showViewStateError(s);
+                        }
                     }
                 });
 
@@ -211,7 +231,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {//这样view.showLoginSuccess()方法就会执行在主线程中
                     @Override
                     public void run() {
-                        mLoginView.showLoginSuccess(name);
+                        if (mLoginView != null) {
+                            mLoginView.showLoginSuccess(name);
+                        }
                     }
                 });
             }
@@ -221,7 +243,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mLoginView.showLoginError();
+                        if (mLoginView != null) {
+                            mLoginView.showLoginError();
+                        }
                     }
                 });
             }
@@ -235,12 +259,14 @@ public class SourcePresenter {
     public void scoureQuery(String year) {
         sourceQuery.score(year, new IOnQuerySourceListener() {
             @Override
-            public void OnQuerySuccess(final ArrayList<Bean_s> list) {
-                final ArrayList<String> strings = Bean_sToString(list);
+            public void OnQuerySuccess(final ArrayList<String> list) {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        view.showSource(strings);
+                        if (view != null) {
+                            view.showSource(list);
+                        }
+
                     }
                 });
 
@@ -251,7 +277,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        view.showSourceError(s);
+                        if (view != null) {
+                            view.showSourceError(s);
+                        }
                     }
                 });
 
@@ -259,38 +287,19 @@ public class SourcePresenter {
         });
     }
 
-    private ArrayList<String> Bean_sToString(ArrayList<Bean_s> list) {
-        //这里复习下list的知识，因为每次都是在list的尾部进行操作的，所以不会对数组进行copy操作，所以采用list就行，如果要对数据及进行增删较多，用linklist更好。
-        ArrayList<String> mlist = new ArrayList<>();
-        float sum = 0;
-        int size = list.size();
-        if (size > 0) {
-            for (int i = 0; i < size; i++) {
-                try {
-                    sum = Float.parseFloat(list.get(i).getScore()) + sum;
-                    // sum += Integer.parseInt(list.get(i).getScore());
-                } catch (NumberFormatException e) {
-                    sum = 0;
-                }
-                mlist.add(list.get(i).getClassName() + "空" + list.get(i).getScore());
-            }
-            float range = sum / size;
-            mlist.add("平均成绩空" + range);
-            return mlist;
-        }
-        return mlist;
-    }
 
     public void timetable(int start) {
 
         sourceQuery.timeTable(start, new ITimeTableListener() {
             @Override
             public void QueryTimeTableSuccess(final List nodes) {
-                Log.i("000", "课表查询成功");
+                MyLog.i("课表查询成功");
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mTableView.showTimeTble(nodes);
+                        if (mTableView != null) {
+                            mTableView.showTimeTble(nodes);
+                        }
                     }
                 });
             }
@@ -300,7 +309,9 @@ public class SourcePresenter {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        mTableView.showTimeTbleError(s);
+                        if (mTableView != null) {
+                            mTableView.showTimeTbleError(s);
+                        }
                     }
                 });
             }
