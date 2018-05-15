@@ -35,6 +35,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
 import okhttp3.Response;
+
 import static android.util.Log.i;
 
 /**
@@ -212,7 +213,9 @@ public class SourceAndLoginBiz implements ILogin {
             @Override
             public void onFailure(Call call, IOException e) {
                 MyLog.i(e.toString());
-                listener.showExamError("嗷了个嗷，出错了");
+                if (listener != null) {
+                    listener.showExamError("嗷了个嗷，出错了");
+                }
             }
 
             @Override
@@ -234,6 +237,7 @@ public class SourceAndLoginBiz implements ILogin {
      */
     private void castExamState(InputStream inputStream, String url, IExamListener listener) {
         if (inputStream == null) {
+            MyLog.i("inputstream为空");
             return;
         }
         Document document = null;
@@ -247,6 +251,7 @@ public class SourceAndLoginBiz implements ILogin {
             //获取出第三个input标签
             Element element = elements.get(2);
             viewState = element.attr("value");
+            MyLog.i("我走了getviewstate");
             //  getdata(document, listener);
         }
         try {
@@ -266,11 +271,22 @@ public class SourceAndLoginBiz implements ILogin {
     private void getdata(Document document, IExamListener listener) {
         if (document != null) {
             //这里需要再一次判断，第一次有没有数据，没有签的话没有只有一个<tr>标签，直接return 回去
-            if (isfirstHasData(document)) {
+            MyLog.i("doucement不为空");
+            if (hasData(document)) {
                 //进行数据解析
+                MyLog.i("hasdata为true");
                 pastExamData(document, listener);
+            } else {
+                if ((listener != null)) {
+                    listener.showExamError("这学期还没有数据哟");
+                }
+            }
+        } else {
+            if (listener != null) {
+                listener.showExamError("好像出了点问题");
             }
         }
+
     }
 
     /**
@@ -296,6 +312,7 @@ public class SourceAndLoginBiz implements ILogin {
     private void castExamData(IExamListener listener, Elements elements, int size) {
         int i = 0;
         List<ExamBean> list = new ArrayList<>();
+        MyLog.i("我走了castExamdata");
         while (i < size) {
             Elements select = elements.get(i).select("td");
             String s = "".equals(select.get(6).text()) ? "" : " " + select.get(6).text() + "号";
@@ -304,7 +321,9 @@ public class SourceAndLoginBiz implements ILogin {
             list.add(bean);
             i++;
         }
-        listener.showExamSuccess(list);
+        if (listener != null) {
+            listener.showExamSuccess(list);
+        }
 
     }
 
@@ -314,7 +333,7 @@ public class SourceAndLoginBiz implements ILogin {
      * @param document 文档对象
      * @return true 有数据 false 没有数据
      */
-    private boolean isfirstHasData(Document document) {
+    private boolean hasData(Document document) {
         return document.select("tr").size() > 1;
     }
 
@@ -400,7 +419,7 @@ public class SourceAndLoginBiz implements ILogin {
 
 
     /**
-     * 执行登录
+     * 执行登录，第一次没有保存的话，就要保存用户名密码到自己的数据库
      *
      * @param bean     实体类对想，包含登录所需要的信息
      * @param listener 回调监听
@@ -428,7 +447,6 @@ public class SourceAndLoginBiz implements ILogin {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                //这里不应全部读取，当读取到同学的时候，应该停止读取了
                 if (response.code() != 200) {
                     if (listener != null) {
                         listener.OnLoginError(response.message());

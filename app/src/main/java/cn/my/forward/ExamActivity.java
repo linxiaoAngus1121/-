@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,12 +16,15 @@ import java.util.List;
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyRecycleViewAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
+import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IExamView;
 
 public class ExamActivity extends AppCompatActivity implements IExamView {
 
     private SourcePresenter presenter = new SourcePresenter(this);
     private RecyclerView mRv;
+    private MyRecycleViewAdapter adapter;
+    private List<ExamBean> mList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +39,7 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //从0开始
-                Log.i("000", position + "选择的位置");
+                MyLog.i(position + "选择的位置");
                 String parentItemAtPosition = (String) parent.getItemAtPosition(position);
                 presenter.examQuery(parentItemAtPosition);
             }
@@ -91,17 +93,27 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
 
     @Override
     public void showExam(List<ExamBean> list) {
-        if (list.size() == 0) {
-            this.showError("嗷了个嗷，出错了");
-            return;
+        MyLog.i(list.size() + "返回的list长度");
+        Toast.makeText(this, "查询成功", Toast.LENGTH_SHORT).show();
+        if (adapter != null) {
+            MyLog.i("adapter为空");
+            mList.clear();
+            mList.addAll(list);
+            adapter.notifyDataSetChanged();
+        } else {
+            mList = new ArrayList<>();
+            mList.addAll(list);
+            adapter = new MyRecycleViewAdapter(this, mList);
+            mRv.setAdapter(adapter);
         }
-        Toast.makeText(this, "查询成功" + list.size(), Toast.LENGTH_SHORT).show();
-        MyRecycleViewAdapter adapter = new MyRecycleViewAdapter(this, list);
-        mRv.setAdapter(adapter);
     }
 
     @Override
     public void showError(String s) {
+        if(adapter!=null){
+            mList.clear();
+            adapter.notifyDataSetChanged();
+        }
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 }

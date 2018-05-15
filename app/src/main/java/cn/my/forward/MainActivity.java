@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import java.io.InputStream;
 
+import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
 
@@ -98,8 +99,14 @@ public class MainActivity extends BaseActivity implements ILoginView, View
             remberPs(this.getstudNo(), this.getstuPs());
         }
         Intent intent = new Intent(MainActivity.this, ChoiseActivity.class);
-        intent.putExtra("stu_no", this.getstudNo());
-        intent.putExtra("stu_name", name);
+      /*  intent.putExtra("stu_no", this.getstudNo());
+        intent.putExtra("stu_ps", this.getstuPs());
+        intent.putExtra("stu_name", name);*/
+        Bean_l lo = new Bean_l();
+        lo.setStuNo(this.getstudNo());
+        lo.setName(name);
+        lo.setStuPs(this.getstuPs());
+        intent.putExtra("information", lo);
         startActivity(intent);
         finish();
     }

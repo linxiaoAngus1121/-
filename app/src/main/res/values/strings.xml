@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ForwarApplication</string>
+    <string name="app_name">教务系统</string>
     <string name="ed_ps">请输入密码</string>
     <string name="ed_code">请输入验证码</string>
     <string name="query">登陆</string>

@@ -49,7 +49,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
     /**
      * 返回数据源
      *
-     * @param stuNo 学好
+     * @param stuNo 学号
      * @return 返回数据源list
      */
     private ArrayList<String> getList(String stuNo) {
