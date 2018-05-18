@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
@@ -45,6 +46,7 @@ import static android.util.Log.i;
 
 public class SourceAndLoginBiz implements ILogin {
     private String stuName; //学生的名字
+    private String nameexceptclass;//学生名字没有同学两个字的
     private MyOkhttp instance = MyOkhttp.getInstance();     //单例实现
     private ArrayList<String> list = new ArrayList<>();     //存放成绩的list
     private Bean_l bean;
@@ -52,6 +54,7 @@ public class SourceAndLoginBiz implements ILogin {
     private String viewState;   //考试查询的viewstate
     private String viewStateForPerson;   //个人信息查询的viewstate（即成绩查询中的成绩统计）
     private boolean flag = false;    //判断是否是个人信息查询的标志位
+    private String submitState;
 
 
     private SourceAndLoginBiz() {
@@ -143,6 +146,187 @@ public class SourceAndLoginBiz implements ILogin {
     public void personInfomation(IPersonListener listener) {
         GetPersonData(listener);
     }
+
+  /*  @Override
+    public void questionQuery(final IQuestionListener listener) {
+        final String url = "http://jwxt.sontan.net/wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
+                stuName
+                + "&gnmkdm=N121304";
+        MyLog.i(url + "问卷调查的url");
+        Map<String, String> map = new HashMap<>();
+        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        map.put("Connection", "keep-alive");
+        map.put("Cookie", bean.getCookies());
+        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
+        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
+                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        instance.GetRequest(url, map, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                MyLog.i("妈个鸡，进不去");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() != 200) {
+                    return;
+                }
+                Document document = Jsoup.parse(response.body().byteStream(), "gb2312", url);
+                String html = document.html();
+                MyLog.i(html);
+                MyLog.i("viewstate成功了");
+                getQuestionViewState(response.body().byteStream(), url, listener);
+            }
+        });
+    }
+
+    @Override
+    public void questionSubmit(List<String> list, final ISubmitListener listener) {
+        if (submitState == null) {
+            if (listener != null) {
+                listener.submitError();
+
+            }
+        }
+        String[] strings = ChangeCode(list);
+        final String url = "http://jwxt.sontan.net/wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
+                utf8Togb2312
+                        (nameexceptclass) + "&gnmkdm=N121304";
+        MyLog.i(url);
+        Map<String, String> map = new HashMap<>();
+        map.put("Accept-Encoding", "gzip, deflate");
+        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        map.put("Cache-Control", "max-age=0");
+        map.put("Connection", "keep-alive");
+        map.put("Cookie", bean.getCookies());
+        map.put("Referer", url);
+        map.put("Content-Length", "15011");
+        map.put("Content-Type", "application/x-www-form-urlencoded");
+        map.put("Upgrade-Insecure-Requests", "1");
+        map.put("Origin", "http://jwxt.sontan.net");
+        map.put("Host", "jwxt.sontan.net");
+        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
+                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        instance.PostQuestionRequest(url, submitState, map, strings, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (listener != null) {
+                    listener.submitError();
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Document document = Jsoup.parse(response.body().byteStream(), "gb2312", url);
+                document.html();
+                boolean b = document.html().contains("提交成功！");
+                MyLog.i("提交是否成功" + b);
+
+                if (b) {
+                    if (listener != null) {
+                        listener.submitSuccess();
+                    }
+                } else {
+                    if (listener != null) {
+                        listener.submitError();
+                    }
+                }
+            }
+        });
+
+    }
+    private String[] ChangeCode(List<String> list) {
+        int size = list.size();
+        String[] t = new String[size + 2];
+        for (int i = 0; i < size; i++) {    //年级那个单独处理,其他的正常
+            String s = utf8Togb2312(list.get(i));
+            t[i + 2] = s;
+        }
+        return t;
+    }
+
+    private void getQuestionViewState(InputStream inputStream, String url, IQuestionListener
+            listener) {
+        try {
+            Document document = Jsoup.parse(inputStream, "gb2312", url);
+            String viewstate = document.select("input").get(2).val();//页面上的viewstate
+            requestForpage(viewstate, listener);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void requestForpage(String viewstate, final IQuestionListener listener) {
+        final String url = "http://jwxt.sontan.net/wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
+                stuName
+                + "&gnmkdm=N121304";
+        String name = utf8Togb2312(nameexceptclass);
+        if (name == null) {
+            if (listener != null) {
+                listener.questionError();   //出错
+                return;
+            }
+        }
+        Map<String, String> map = new HashMap<>();
+      map.put("Accept-Language","zh-CN,zh;q=0.8");
+        map.put("Connection","keep-alive");
+        map.put("Content-Type","application/x-www-form-urlencoded");
+        map.put("Cookie",bean.getCookies());
+        map.put("Referer","http://jwxt.sontan.net/wjdc.aspx?xh="+bean.getStuNo()+"&xm="+
+    name +
+            "&gnmkdm=N121304");
+        map.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, "+
+                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        instance.PostQuestionRequest(url,viewstate,map,null,new
+
+    Callback() {
+        @Override
+        public void onFailure (Call call, IOException e){
+            if (listener != null) {
+                listener.questionError();
+            }
+        }
+
+        @Override
+        public void onResponse (Call call, Response response) throws IOException {
+            InputStream inputStream = response.body().byteStream();
+            Document document = Jsoup.parse(inputStream, "gb2312", url);
+            submitState = document.select("input").get(2).val();    //获得待会要点提交后需要的viewstate
+            int size = document.select("b").size();
+            Elements elements = document.select("b");
+            List<QuestionBean> list = new ArrayList<>(size - 2);
+            if (size > 0) {
+                for (int i = 2; i < size; i++) {    //把所有的b标签取出来，放到实体类对象中
+                    QuestionBean questionBean = new QuestionBean();
+                    questionBean.setQuestion(elements.get(i).text());//问题
+                    SparseArray<String> answer = getAnswer(document, i);
+                    questionBean.setAnswer(answer);
+                    list.add(questionBean);
+                }
+            } else {
+                if (listener != null) {
+                    listener.questionError();
+                    return;
+                }
+            }
+            MyLog.i(list.size() + "size");
+            if (listener != null) {
+                listener.questionSuccess(list);
+            }
+        }
+    });
+}
+
+    private SparseArray<String> getAnswer(Document document, int i) {
+        SparseArray<String> map = new SparseArray<>();
+        Elements elements = document.select("table");
+        Elements select = elements.get(i).select("input");
+        int size = elements.get(i).select("input").size();
+        for (int t = 0; t < size; t++) {
+            map.put(t, select.get(t).val());
+        }
+        return map;
+    }*/
 
     private void GetPersonData(IPersonListener listener) {
         flag = true;
@@ -458,6 +642,15 @@ public class SourceAndLoginBiz implements ILogin {
                     Element element = document.select("span#xhxm").first();
                     if (element != null) {
                         stuName = element.text();
+                        String[] split = null;
+                        try {
+                            split = stuName.split("同");
+                            nameexceptclass = split[0];
+                        } catch (PatternSyntaxException e) {
+                            if (split != null) {
+                                split[0] = null;
+                            }
+                        }
                     } else {
                         if (listener != null) {
                             listener.OnLoginError("开了会小差，出错了");
@@ -544,7 +737,7 @@ public class SourceAndLoginBiz implements ILogin {
         Elements elements = parse.select("table.blacktab");
         List<Node> nodes = elements.get(0).childNode(1).childNodes();
         //这个list就放有我需要的课表信息
-        i("000", nodes.size() + "size");
+        MyLog.i(nodes.size() + "size");
         ArrayList<Node> need = new ArrayList<>();
         int size = nodes.size();
         for (int i = 1; i < size - 1; i++) {
@@ -1167,27 +1360,41 @@ public class SourceAndLoginBiz implements ILogin {
     }
 
     /**
-     * 将名字转成gb2312编码，并拼接返回
+     * 将名字转成gb2312编码，并拼接返回,注意此处如果字符串中包含数字，要进行特殊处理
      *
-     * @param name 名字
+     * @param name 源字符串
      * @return 返回拼接后的数据
      */
     private String utf8Togb2312(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        //判断是否包含数字
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(name);
+        String number = null;
+        while (matcher.find()) {    //找到数字
+            number = matcher.group(0);
+            name = name.replaceAll("\\d+", "");
+        }
+
+
         byte[] bytes = new byte[0];//先把字符串按gb2312转成byte数组
         try {
             bytes = name.getBytes("gb2312");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        String[] a = new String[10];
+        String[] a = new String[20];
         int i = 0;
         for (byte b : bytes) {//循环数组
             String s = Integer.toHexString(b);//再用Integer中的方法，把每个byte转换成16进制输出
-            MyLog.i(s);
+            //   MyLog.i(s);
             String substring = s.substring(6, 8).toUpperCase();//可以了
             a[i] = substring;
             i++;
-            MyLog.i(substring);
+            //   MyLog.i(substring);
 /*
             输出示例
             ffffffc2
@@ -1199,6 +1406,9 @@ public class SourceAndLoginBiz implements ILogin {
             //去掉前面6个f就是每个名字的gb2312编码
         }
         StringBuilder builder = new StringBuilder();
+        if (number != null) {   //证明之前有进入while,即有字符串
+            builder.append(number);
+        }
         for (String anA : a) {
             if (anA == null) {
                 continue;
@@ -1206,10 +1416,7 @@ public class SourceAndLoginBiz implements ILogin {
             builder.append("%");
             builder.append(anA);
         }
-        MyLog.i(builder.toString() + "拼接完成");
-
+        //   MyLog.i(builder.toString() + "拼接完成");
         return builder.toString();
     }
-
-
 }

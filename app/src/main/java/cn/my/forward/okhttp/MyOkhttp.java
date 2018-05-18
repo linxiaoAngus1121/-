@@ -60,6 +60,47 @@ public class MyOkhttp {
     }
 
 
+    public void PostQuestionRequest(String url, String viewstate, Map<String, String> map,
+                                    String[] string, Callback
+                                            callback) {
+        Request request = buildRequest(url, viewstate, map, string);
+        client.newCall(request).enqueue(callback);
+    }
+
+
+    private Request buildRequest(String url, String s, Map<String, String> m, String[] mlist) {
+        if (mlist == null) {    //这种是请求填写调查问卷的
+            FormBody body = new FormBody.Builder().add("__EVENTTARGET", "Datagrid4:_ctl2:link").add
+                    ("__EVENTARGUMENT", "").add("__VIEWSTATE", s).build();
+            Request.Builder post = new Request.Builder().url(url).post(body);
+            for (Map.Entry<String, String> stringStringEntry : m.entrySet()) {
+                Map.Entry element = (Map.Entry) stringStringEntry;
+                String strKey = (String) element.getKey();
+                String strObj = (String) element.getValue();
+                post.header(strKey, strObj);
+            }
+            return post.build();
+        } else {                    //这种是提交问卷调查的
+            FormBody.Builder body = new FormBody.Builder().add("__EVENTTARGET", "").add
+                    ("__EVENTARGUMENT", "").add("__VIEWSTATE", s);
+            for (int i = 2; i <= 23; i++) {
+                body.add("Datagrid1%3Actl" + i + "%3ARadioButtonList1", mlist[i]);
+                MyLog.i("Datagrid1%3A_ctl" + i + "%3ARadioButtonList1" + "     内容为   " + mlist[i]);
+            }
+            body.add("Button1", "%CC%E1 %A1%A1%BD%BB");
+            FormBody formBody = body.build();
+            Request.Builder post = new Request.Builder().url(url).post(formBody);
+            for (Map.Entry<String, String> stringStringEntry : m.entrySet()) {
+                Map.Entry element = (Map.Entry) stringStringEntry;
+                String strKey = (String) element.getKey();
+                String strObj = (String) element.getValue();
+                post.header(strKey, strObj);
+            }
+            return post.build();
+        }
+    }
+
+
     /**
      * post请求
      *
@@ -188,20 +229,20 @@ public class MyOkhttp {
      */
     private FormBody buildBody(String... sub) {
         MyLog.i("构建历年成绩查询需要传入的参数" + sub[0] + "viewstate" + sub[1] + "学年" + sub[2] + "学期");
-       // if (sub[3] != null) {
-            if (sub[1].equals("") && sub[2].equals("") && sub[3].equals("空")) {  //个人信息查询
-                MyLog.i("走了我想要的");
-                return new FormBody.Builder()
-                        .add("__EVENTTARGET", "")
-                        .add("__EVENTARGUMENT", "")
-                        .add("__VIEWSTATE", sub[0])
-                        .add("hidLanguage", "")
-                        .add("ddlXN", "")
-                        .add("ddlXQ", "")
-                        .add("ddl_kcxz", "")
-                        .add("Button1", "成绩统计")
-                        .build();
-          //  }
+        // if (sub[3] != null) {
+        if (sub[1].equals("") && sub[2].equals("") && sub[3].equals("空")) {  //个人信息查询
+            MyLog.i("走了我想要的");
+            return new FormBody.Builder()
+                    .add("__EVENTTARGET", "")
+                    .add("__EVENTARGUMENT", "")
+                    .add("__VIEWSTATE", sub[0])
+                    .add("hidLanguage", "")
+                    .add("ddlXN", "")
+                    .add("ddlXQ", "")
+                    .add("ddl_kcxz", "")
+                    .add("Button1", "成绩统计")
+                    .build();
+            //  }
         } else if (sub[1].equals("") && sub[2].equals("")) { //历年成绩查询
             return new FormBody.Builder()
                     .add("__EVENTTARGET", "")

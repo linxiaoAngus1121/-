@@ -54,6 +54,8 @@ public class ChoiseActivity extends AppCompatActivity {
                         mIntent = new Intent(ChoiseActivity.this, PersonInformationActivity.class);
                         break;
                     case 5:
+                        //   mIntent = new Intent(ChoiseActivity.this, QuestionSurveyActivity
+                        // .class);
                         Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)
                                 .show();
                         break;

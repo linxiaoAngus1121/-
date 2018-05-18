@@ -37,6 +37,9 @@
             android:name=".service.LoginService"
             android:enabled="true"
             android:exported="true"/>
+
+        <activity android:name=".QuestionSurveyActivity">
+        </activity>
     </application>
 
 </manifest>

@@ -41,6 +41,7 @@ public class SourcePresenter {
     private ILevealView mLevel;
     private IPersonView mPerson;
     private ILoginView mLoginView;
+    //private IQuestionView questionview;
     private Bean_l bean01;
     private Handler mhalder = new Handler(Looper.getMainLooper());  //让handler运行在主线程中
 
@@ -58,14 +59,68 @@ public class SourcePresenter {
             mPerson = (IPersonView) view;
         } else if (view instanceof ILoginView) {
             mLoginView = (ILoginView) view;
-        } else {
-            try {
-                throw new Exception("大哥，你错了");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        }
+        try {
+            throw new Exception("大哥，你错了");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
+
+
+  /*  public void question() {
+        sourceQuery.questionQuery(new IQuestionListener() {
+            @Override
+            public void questionSuccess(final List<QuestionBean> list) {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        questionview.showSelect(list);
+                    }
+                });
+            }
+
+            @Override
+            public void questionError() {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        questionview.showError();
+                    }
+                });
+            }
+        });
+    }*/
+
+    /**
+     * 提交用户填写的信息
+     *
+     * @param mlist 信息集
+     */
+ /*   public void questionSubmit(List<String> mlist) {
+        sourceQuery.questionSubmit(mlist, new ISubmitListener() {
+            @Override
+            public void submitSuccess() {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        questionview.submitSuccess();
+                    }
+                });
+            }
+
+            @Override
+            public void submitError() {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        questionview.submitError();
+                    }
+                });
+            }
+        });
+    }*/
 
     /**
      * 等级考试查询
