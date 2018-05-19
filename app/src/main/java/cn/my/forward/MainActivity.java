@@ -99,9 +99,6 @@ public class MainActivity extends BaseActivity implements ILoginView, View
             remberPs(this.getstudNo(), this.getstuPs());
         }
         Intent intent = new Intent(MainActivity.this, ChoiseActivity.class);
-      /*  intent.putExtra("stu_no", this.getstudNo());
-        intent.putExtra("stu_ps", this.getstuPs());
-        intent.putExtra("stu_name", name);*/
         Bean_l lo = new Bean_l();
         lo.setStuNo(this.getstudNo());
         lo.setName(name);
@@ -128,6 +125,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     public void showLoginError() {
         Toast.makeText(this, "登录失败,请重试", Toast.LENGTH_SHORT).show();
         mButton.setText("登陆");
+        editText.setText("");
         mButton.setClickable(true);
         presenter.changeCode();
     }

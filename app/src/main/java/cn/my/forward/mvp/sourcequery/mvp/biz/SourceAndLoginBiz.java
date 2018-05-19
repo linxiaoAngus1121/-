@@ -609,6 +609,9 @@ public class SourceAndLoginBiz implements ILogin {
      * @param listener 回调监听
      */
     private void tologin(final Bean_l bean, final IOnLoginListener listener) {
+        if (this.bean != null) {
+            this.bean = null;
+        }
         this.bean = bean;
         Map<String, String> map = new HashMap<>();
         // TODO: 2018/2/7  因为这个是要和服务器下发的cookies保持一致才能进行登录，之前的就是这里出错，所以不能登录.
@@ -625,7 +628,7 @@ public class SourceAndLoginBiz implements ILogin {
             public void onFailure(Call call, IOException e) {
                 MyLog.i(e.toString() + "嘎嘎嘎嘎嘎嘎嘎嘎嘎");
                 if (listener != null) {
-                    listener.OnLoginError(e.toString());
+                    listener.OnLoginError();
                 }
             }
 
@@ -633,7 +636,7 @@ public class SourceAndLoginBiz implements ILogin {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() != 200) {
                     if (listener != null) {
-                        listener.OnLoginError(response.message());
+                        listener.OnLoginError();
                     }
                     return;
                 }
@@ -646,25 +649,23 @@ public class SourceAndLoginBiz implements ILogin {
                         try {
                             split = stuName.split("同");
                             nameexceptclass = split[0];
+                            if (listener != null) {
+                                listener.OnLoginSuccess(stuName);
+                            }
                         } catch (PatternSyntaxException e) {
-                            if (split != null) {
-                                split[0] = null;
+                            if (listener != null) {
+                                listener.OnLoginError();
                             }
                         }
                     } else {
                         if (listener != null) {
-                            listener.OnLoginError("开了会小差，出错了");
+                            listener.OnLoginError();
                         }
                     }
                 } catch (Selector.SelectorParseException e) {
                     if (listener != null) {
-                        listener.OnLoginError("开了会小差，出错了");
+                        listener.OnLoginError();
                     }
-                }
-                if (listener != null && stuName != null) {
-                    listener.OnLoginSuccess(stuName);
-                } else if (listener != null) {
-                    listener.OnLoginError("开了会小差，出错了");
                 }
             }
         });

@@ -31,6 +31,9 @@ public class MyOkhttp {
         return instance;
     }
 
+
+
+
     //防止被new
     private MyOkhttp() {
         client = new OkHttpClient();

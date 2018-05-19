@@ -229,7 +229,6 @@ public class SourcePresenter {
         sourceQuery.prepareLogin(new IGetCodeListtener() {
             @Override
             public void getCodeSuccess(final InputStream inputStream, Bean_l bean) {
-                // view.showCode(inputStream, bean);
                 bean01 = bean;
                 mhalder.post(new Runnable() {
                     @Override
@@ -246,7 +245,6 @@ public class SourcePresenter {
 
             @Override
             public void getCodeFailure(final String s) {
-                //   view.showCodeError(s);
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
@@ -294,7 +292,7 @@ public class SourcePresenter {
             }
 
             @Override
-            public void OnLoginError(String s) {
+            public void OnLoginError() {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
@@ -388,6 +386,9 @@ public class SourcePresenter {
         }
         if (mLevel != null) {
             mLevel = null;
+        }
+        if (mPerson != null) {
+            mPerson = null;
         }
     }
 }
