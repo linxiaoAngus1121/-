@@ -7,16 +7,17 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
+
 /*
 * 在这里进行一些全局的初始化，比如判断网络
 * */
-public  class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity {
 
     private List<String> permissionList = new ArrayList<>();
 
@@ -62,7 +63,7 @@ public  class BaseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         permissionList.clear();
-        Log.i("000", "执行了ondestroy,,,,,,,,,,,,,,,baseactivity");
+        MyLog.i("执行了ondestroy,,,,,,,,,,,,,,,baseactivity");
         permissionList = null;
     }
 

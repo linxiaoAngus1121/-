@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="40dp"
+              android:orientation="horizontal">
+
+    <TextView
+
+        android:id="@+id/dialog_item_seat_type"
+        style="@style/TrainTicket"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
+        android:textSize="18sp"
+        />
+
+    <TextView
+        android:id="@+id/dialog_item_seat_money"
+        style="@style/TrainTicket"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.3"
+        android:text=""
+        android:textSize="18sp"
+        />
+
+    <TextView
+        android:id="@+id/dialog_item_seat_remain"
+        style="@style/TrainTicket"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:textSize="18sp"
+
+        />
+</LinearLayout>

@@ -11,5 +11,5 @@ import java.util.ArrayList;
 public interface IOnQuerySourceListener {
     void OnQuerySuccess(ArrayList<String> list);
 
-    void OnError(String s);
+    void OnError();
 }

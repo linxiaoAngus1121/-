@@ -25,8 +25,11 @@
         style="@style/progressBar_shape"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_above="@+id/include"
         android:layout_centerInParent="true"
         />
 
-    <include layout="@layout/information_included"/>
+    <include
+        android:id="@+id/include"
+        layout="@layout/information_included"/>
 </RelativeLayout>

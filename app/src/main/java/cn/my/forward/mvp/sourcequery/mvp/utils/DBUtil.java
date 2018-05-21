@@ -5,19 +5,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBUtil {
-    //    private static String url="jdbc:mysql://localhost:3306/lx?useUnicode=true
-    // &characterEncoding=utf8&allowMultiQueries=true";
-    private static String url = "jdbc:mysql://b29bbh4t.2368.dnstoo" +
+    private static String URL = "jdbc:mysql://b29bbh4t.2368.dnstoo" +
             ".com/system_lx?useUnicode=true&characterEncoding=utf8";
-    private static String driverClass = "com.mysql.jdbc.Driver";
-    private static String username = "system_lx_f";
-    private static String password = "aa123456789";
+    private static String DRIVERCLASS = "com.mysql.jdbc.Driver";
+    private static String USERNAME = "system_lx_f";
+    private static String PASSWORD = "aa123456789";
     private static Connection conn;
 
     //装载驱动  
     static {
         try {
-            Class.forName(driverClass);
+            Class.forName(DRIVERCLASS);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -26,7 +24,7 @@ public class DBUtil {
     //获取数据库连接  
     public static Connection getConnection() {
         try {
-            conn = DriverManager.getConnection(url, username, password);
+            conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             e.printStackTrace();
         }

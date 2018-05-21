@@ -23,15 +23,17 @@ public class LevelActivity extends AppCompatActivity implements ILevealView {
 
     private ProgressBar mPb;
     private RecyclerView mRv;
+    private SourcePresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level);
         mPb = (ProgressBar) findViewById(R.id.level_pb);
         mRv = (RecyclerView) findViewById(R.id.level_show_recycle_view);
         mRv.setLayoutManager(new LinearLayoutManager(this));
-        SourcePresenter presenter = new SourcePresenter(this);
+        presenter = new SourcePresenter(this);
         presenter.LevelQuery();
         mPb.setVisibility(View.VISIBLE);
     }
@@ -42,7 +44,7 @@ public class LevelActivity extends AppCompatActivity implements ILevealView {
         if (mPb != null) {
             mPb.setVisibility(View.GONE);
         }
-        Toast.makeText(this, "请求成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "查询成功", Toast.LENGTH_SHORT).show();
         MyRecycleViewAdapterForLevel adapter = new MyRecycleViewAdapterForLevel(this, been);
         mRv.setAdapter(adapter);
     }
@@ -55,4 +57,10 @@ public class LevelActivity extends AppCompatActivity implements ILevealView {
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.clearAll();
+        presenter = null;
+    }
 }

@@ -28,7 +28,10 @@ public interface ILogin {
 
     void personInfomation(IPersonListener listener);
 
- //   void questionQuery(IQuestionListener listener);
+    //   void questionQuery(IQuestionListener listener);
 
-  //  void questionSubmit(List<String> list, ISubmitListener listener);
+    //  void questionSubmit(List<String> list, ISubmitListener listener);
+
+
+    void tickets(String from, String to, ITickedListener listener);
 }

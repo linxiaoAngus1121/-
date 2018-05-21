@@ -124,9 +124,9 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
     }
 
     @Override
-    public void showSourceError(String s) {
+    public void showSourceError() {
         bar.setVisibility(View.GONE);
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "查询出错啦", Toast.LENGTH_SHORT).show();
     }
 
 

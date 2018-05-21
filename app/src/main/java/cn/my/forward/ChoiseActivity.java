@@ -74,11 +74,9 @@ public class ChoiseActivity extends AppCompatActivity {
                                 .show();
                         break;
                     case 7:
-                        Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)
-                                .show();
-                      /*  mIntent = new Intent(ChoiseActivity.this, TicketsActivity
+                        mIntent = new Intent(ChoiseActivity.this, TicketsActivity
                                 .class);
-                        mlist.add("火车票查询");*/
+                        mlist.add("火车票查询");
                         break;
                     case 8:
                         Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)

@@ -31,7 +31,17 @@ public class MyOkhttp {
         return instance;
     }
 
+    /**
+     * 火车票信息查询
+     *
+     * @param url      地址
+     * @param callback 回调
+     */
+    public void testGet(String url, Callback callback) {
+        Request builder = new Request.Builder().get().url(url).build();
+        client.newCall(builder).enqueue(callback);
 
+    }
 
 
     //防止被new

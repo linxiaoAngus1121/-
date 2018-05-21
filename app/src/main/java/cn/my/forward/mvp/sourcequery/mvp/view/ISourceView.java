@@ -12,6 +12,6 @@ public interface ISourceView {
 
     void showSource(ArrayList<String> list);  //展示学生成绩
 
-    void showSourceError(String s);   //展示错误
+    void showSourceError();   //展示错误
 
 }

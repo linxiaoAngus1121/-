@@ -37,7 +37,7 @@ public class MyRecycleViewAdapterForLevel extends RecyclerView
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mtv_subject.setText(mList.get(position).getL_name());
+        holder.mtv_subject.setText(" " + mList.get(position).getL_name());
         holder.mtv_time.setText(mList.get(position).getAdmissionTicket());
         holder.mtv_address.setText(mList.get(position).getGrade());
 

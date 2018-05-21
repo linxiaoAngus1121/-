@@ -1,100 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lv"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
-    <RelativeLayout
-        android:id="@+id/lv"
+    <LinearLayout
+        android:id="@+id/top"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:gravity="center"
         >
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.17"
+            android:text="@string/from"
+            />
 
         <EditText
             android:id="@+id/edit_from"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="请输入出发站"/>
+            android:layout_weight="0.28"
+            android:gravity="center"
+            />
+
+        <ImageView
+            android:id="@+id/swap_iv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:src="@drawable/swap"
+            />
+
 
         <TextView
-            android:id="@+id/split"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/edit_from"
-            android:layout_toEndOf="@id/edit_from"
-            android:text="---"
+            android:layout_weight="0.17"
+            android:text="@string/to"
             />
 
         <EditText
             android:id="@+id/edit_to"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/split"
-            android:hint="请输入终点站"/>
-
-        <ImageButton
-            android:id="@+id/ib"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/edit_to"
-            android:layout_marginStart="15dp"
-            android:layout_toEndOf="@id/edit_to"
-            android:onClick="query"
-            android:src="@drawable/finger"
+            android:layout_weight="0.28"
+            android:gravity="center"
             />
 
-
-        <ListView
-            android:id="@+id/show_data"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/ib"
-            />
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="@color/colorLavender"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="筛选条件"/>
-
-        <RadioGroup
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0:00-24:00"/>
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0:00-06:00"/>
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="06:00-12:00"/>
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="12:00-18:00"/>
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="18:00-24:00"/>
-        </RadioGroup>
     </LinearLayout>
 
-</android.support.v4.widget.DrawerLayout>
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_below="@id/top"
+        android:background="@color/colorOrign"
+        />
+
+    <LinearLayout
+        android:id="@+id/center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/view"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/train_pre_day"
+            style="@style/TrainTicket"
+            android:layout_weight="0.7"
+            android:gravity="start"
+            />
+        <TextView
+            android:id="@+id/train_time"
+            style="@style/TrainTicket"
+            android:layout_weight="0.5"
+            android:gravity="start"
+            />
+
+        <Button
+            android:id="@+id/confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="查询"/>
+
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/ticket_pb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/show_data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/center"
+        android:layout_marginTop="5dp"
+        />
+
+</RelativeLayout>

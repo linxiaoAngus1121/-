@@ -4,6 +4,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,16 +19,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
+import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_SpareTicket;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
+import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_ticket;
+import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_ticketResult;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.TimeTableBean;
@@ -55,7 +66,7 @@ public class SourceAndLoginBiz implements ILogin {
     private String viewStateForPerson;   //个人信息查询的viewstate（即成绩查询中的成绩统计）
     private boolean flag = false;    //判断是否是个人信息查询的标志位
     private String submitState;
-
+    private Gson gson;
 
     private SourceAndLoginBiz() {
 
@@ -145,6 +156,133 @@ public class SourceAndLoginBiz implements ILogin {
     @Override
     public void personInfomation(IPersonListener listener) {
         GetPersonData(listener);
+    }
+
+    @Override
+    public void tickets(String from, String to, ITickedListener listener) {
+        getTicket(from, to, listener);
+    }
+
+    /**
+     * 获取火车票信息
+     *
+     * @param from     出发地点
+     * @param to       到达地点
+     * @param listener 回调
+     */
+    private void getTicket(String from, String to, final ITickedListener listener) {
+        final String url = "http://api.jisuapi" +
+                ".com/train/station2s?appkey=8a4cb09145dbc09b&start=" + from + "&end=" + to +
+                "&ishigh=0";    //请求列车信息还有票价
+        //日期是明天的
+        String date = getDatePlus1();
+        final String url2 = "http://api.jisuapi.com/train/ticket?appkey=8a4cb09145dbc09b&start="
+                + from + "&end=" + to + "&date=" + date;  //请求列车剩票
+        MyLog.i(url2);
+        instance.testGet(url, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (listener != null) {
+                    listener.getDataError();
+                }
+
+            }
+
+            @Override
+            public void onResponse(Call call, @NonNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    if (listener != null) {
+                        listener.getDataError();
+                    }
+                    return;
+                }
+                MyLog.i("请求成功");
+                gson = new Gson();
+                try {
+                    final Bean_ticket bean_ticket = gson.fromJson(response.body().string(),
+                            Bean_ticket.class);        //这个bean封装了所有信息,车票信息的bean
+                    List<Bean_ticketResult> result = bean_ticket.getResult();
+                    int size = result.size();
+
+                    for (int i = 0; i < result.size(); i++) {
+                        MyLog.i(bean_ticket.getResult().get(i).toString() + "原来的");
+                    }
+
+                    for (int i = 0; i < size; i++) {
+                        if (i >= size - 1) {    //防止越界
+                            break;
+                        }
+                        if (result.get(i).getDeparturetime().equals(result.get(i + 1)
+                                .getDeparturetime()) && result.get(i).getArrivaltime().equals
+                                (result.get(i + 1).getArrivaltime())) {    //重复了，remove后面那个
+                            result.remove(i + 1);
+                            size = result.size();
+                        }
+                    }
+                    for (int i = 0; i < result.size(); i++) {
+                        MyLog.i(bean_ticket.getResult().get(i).toString() + "后来的");
+                    }
+                    getrequestagain(bean_ticket, url2, listener);
+                } catch (JsonSyntaxException e) {
+                    if (listener != null) {
+                        listener.getDataError();
+                    }
+                }
+            }
+        });
+
+    }
+
+    /**
+     * 获取明天日期
+     */
+    private String getDatePlus1() {
+        Date date = new Date();//取时间
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, 1);//把日期往前减少一天，若想把日期向后推一天则将负数改为正数
+        date = calendar.getTime();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String dateString = formatter.format(date);
+        return dateString;
+    }
+
+    private void getrequestagain(final Bean_ticket bean_ticket, String url2, final ITickedListener
+            listener) {
+        instance.testGet(url2, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (listener != null) {
+                    listener.getDataError();
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, @NonNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    if (listener != null) {
+                        listener.getDataError();
+                    }
+                    return;
+                }
+                try {
+                    Bean_SpareTicket spareTicket = gson.fromJson(response.body().string(),
+                            Bean_SpareTicket.class);    //余票信息
+                    int size = spareTicket.getResult().size();
+                    for (int i = 0; i < size; i++) {
+                        MyLog.i(spareTicket.getResult().get(i).toString());
+                    }
+
+                    if (listener != null) {
+                        listener.getDataSuccess(bean_ticket, spareTicket);
+                    }
+                } catch (JsonSyntaxException e) {
+                    if (listener != null) {
+                        listener.getDataError();
+                    }
+                }
+            }
+        });
     }
 
   /*  @Override
@@ -1062,7 +1200,7 @@ public class SourceAndLoginBiz implements ILogin {
             public void onFailure(Call call, IOException e) {
                 i("000", e.toString() + "成绩失败了");
                 if (querySourceListener != null) {
-                    querySourceListener.OnError(e.toString());
+                    querySourceListener.OnError();
                 }
             }
 
@@ -1083,12 +1221,12 @@ public class SourceAndLoginBiz implements ILogin {
                             viewStateForPerson = element.select("input").get(2).val();
                         } else {
                             if (querySourceListener != null) {
-                                querySourceListener.OnError("好像出了点问题");
+                                querySourceListener.OnError();
                             }
                         }
                     } catch (IOException e) {
                         if (querySourceListener != null) {
-                            querySourceListener.OnError("好像出了点问题");
+                            querySourceListener.OnError();
                         }
                     } finally {
                         try {
@@ -1294,7 +1432,7 @@ public class SourceAndLoginBiz implements ILogin {
             public void onFailure(Call call, IOException e) {
                 MyLog.i(e.getMessage() + "查询成绩失败");
                 if (querySourceListener != null) {
-                    querySourceListener.OnError(e.toString());
+                    querySourceListener.OnError();
                 }
 
             }

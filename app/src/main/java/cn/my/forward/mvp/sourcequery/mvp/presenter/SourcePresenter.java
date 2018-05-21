@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
+import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_SpareTicket;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
+import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_ticket;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IExamListener;
@@ -18,6 +20,7 @@ import cn.my.forward.mvp.sourcequery.mvp.biz.ILogin;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IOnLoginListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IOnQuerySourceListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IPersonListener;
+import cn.my.forward.mvp.sourcequery.mvp.biz.ITickedListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.ITimeTableListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.SourceAndLoginBiz;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
@@ -26,6 +29,7 @@ import cn.my.forward.mvp.sourcequery.mvp.view.ILevealView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
 import cn.my.forward.mvp.sourcequery.mvp.view.IPersonView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
+import cn.my.forward.mvp.sourcequery.mvp.view.ITicketsView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ITimeTableView;
 
 /**
@@ -40,6 +44,7 @@ public class SourcePresenter {
     private IExamView mExamView;
     private ILevealView mLevel;
     private IPersonView mPerson;
+    private ITicketsView ticketsView;
     private ILoginView mLoginView;
     //private IQuestionView questionview;
     private Bean_l bean01;
@@ -59,11 +64,14 @@ public class SourcePresenter {
             mPerson = (IPersonView) view;
         } else if (view instanceof ILoginView) {
             mLoginView = (ILoginView) view;
-        }
-        try {
-            throw new Exception("大哥，你错了");
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else if (view instanceof ITicketsView) {
+            ticketsView = (ITicketsView) view;
+        } else {
+            try {
+                throw new Exception("大哥，你错了");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -269,8 +277,35 @@ public class SourcePresenter {
 
             }
         });
-
     }
+
+    public void ticket() {
+        ticketsView.loading();
+        String from = ticketsView.getFrom();
+        String to = ticketsView.getTo();
+        sourceQuery.tickets(from, to, new ITickedListener() {
+            @Override
+            public void getDataSuccess(final Bean_ticket ticket, final Bean_SpareTicket spareTicket) {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ticketsView.showTicketData(ticket,spareTicket);
+                    }
+                });
+            }
+
+            @Override
+            public void getDataError() {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ticketsView.showTicketError();
+                    }
+                });
+            }
+        });
+    }
+
 
     public void login() {
         mLoginView.closekeyboard();
@@ -326,12 +361,12 @@ public class SourcePresenter {
             }
 
             @Override
-            public void OnError(final String s) {
+            public void OnError() {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
                         if (view != null) {
-                            view.showSourceError(s);
+                            view.showSourceError();
                         }
                     }
                 });
@@ -390,5 +425,19 @@ public class SourcePresenter {
         if (mPerson != null) {
             mPerson = null;
         }
+        if (ticketsView != null) {
+            ticketsView = null;
+        }
+    }
+
+    /**
+     * 交换from和to
+     *
+     * @param from from
+     * @param to   to
+     * @return 结果
+     */
+    public String[] swap(String from, String to) {
+        return new String[]{to, from};
     }
 }

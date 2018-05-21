@@ -23,5 +23,8 @@
     <string name="college">学院</string>
     <string name="orientation">专业方向</string>
     <string name="welcome">欢迎你：</string>
+    <string name="seat_type">座位类型</string>
+    <string name="from">始发地：</string>
+    <string name="to">目的地：</string>
 
 </resources>
