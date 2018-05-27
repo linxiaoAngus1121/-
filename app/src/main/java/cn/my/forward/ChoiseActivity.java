@@ -78,9 +78,11 @@ public class ChoiseActivity extends AppCompatActivity {
                                 .class);
                         mlist.add("火车票查询");
                         break;
-                    case 8:
-                        Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)
-                                .show();
+                    case 8: //bug反馈
+                        mIntent = new Intent(ChoiseActivity.this, FeedBackActivity
+                                .class);
+                        mIntent.putExtra("information", extra);
+                        mlist.add("错误反馈");
                         break;
                     default:
                         break;

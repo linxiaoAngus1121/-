@@ -95,7 +95,7 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
                 while (isflag) {
                     try {
                         Thread.sleep(1);
-                        if(handler!=null){
+                        if (handler != null) {
                             Message message = handler.obtainMessage(0x110);
                             handler.sendMessage(message);
                         }
@@ -122,7 +122,11 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
 
     @Override
     public void showTicketError() {
+        if (mpb != null) {
+            mpb.setVisibility(View.GONE);
+        }
         Toast.makeText(this, "查询出错啦，换个地址试试", Toast.LENGTH_SHORT).show();
+
     }
 
     @Override

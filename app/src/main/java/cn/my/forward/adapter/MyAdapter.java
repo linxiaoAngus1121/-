@@ -20,8 +20,8 @@ import cn.my.forward.R;
 
 public class MyAdapter extends BaseAdapter {
 
-    private String[] title = {"成绩查询", "课表查询", "考试查询", "4，6级", "个人信息", "密码修改", "校园招聘", "火车汽车票",
-            "景点门票"
+    private String[] title = {"成绩查询", "课表查询", "考试查询", "4、6级", "个人信息", "密码修改", "校园招聘", "火车汽车票",
+            "错误反馈"
     };
     private List<Drawable> picture = new ArrayList<>();
     private LayoutInflater from;
@@ -37,7 +37,7 @@ public class MyAdapter extends BaseAdapter {
         picture.add(context.getResources().getDrawable(R.drawable.key));
         picture.add(context.getResources().getDrawable(R.drawable.job));
         picture.add(context.getResources().getDrawable(R.drawable.train));
-        picture.add(context.getResources().getDrawable(R.drawable.ticket));
+        picture.add(context.getResources().getDrawable(R.drawable.error));
 
     }
 

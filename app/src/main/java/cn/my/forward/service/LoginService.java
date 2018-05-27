@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -51,16 +52,17 @@ public class LoginService extends IntentService {
         if (intent != null) {
             Bean_l login = intent.getParcelableExtra("information");
             ArrayList<String> list = intent.getStringArrayListExtra("list");    //用户点击了什么功能
-            String password = Md5Utils.md5Password(login.getStuPs());
+            String password = Md5Utils.md5Password(login.getStuPs());           //加密用户密码
             Connection con;
+            ResultSet rs = null;
             try {
                 con = DBUtil.getConnection();
                 String sql = "select * from stu where xuehao='" + login.getStuNo() + "' and " +
                         "password='" + password + "'";
                 Statement stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery(sql);
+                rs = stmt.executeQuery(sql);
                 if (rs.next()) {
-                    //之前已经存在数据了
+                    //之前已经存在数据了，那就取出名字和id(注意此处不取学号)
                     MyLog.i("之前就有了，或者插入成功了");
                     //如果修改了密码的话
                     if (!Objects.equals(rs.getString("password"), password)) {    //证明修改了密码
@@ -111,6 +113,12 @@ public class LoginService extends IntentService {
             } catch (Exception e) {
                 MyLog.i("数据库链接时遇到了问题");
             } finally {
+                try {
+                    assert rs != null;
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 DBUtil.Close();
             }
         }

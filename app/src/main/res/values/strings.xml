@@ -22,9 +22,14 @@
     <string name="major">专业</string>
     <string name="college">学院</string>
     <string name="orientation">专业方向</string>
-    <string name="welcome">欢迎你：</string>
+    <string name="welcome">欢迎您：</string>
     <string name="seat_type">座位类型</string>
     <string name="from">始发地：</string>
     <string name="to">目的地：</string>
+    <string name="suggest_title">意见建议</string>
+    <string name="suggest_content">请详细描述您使用过程中遇到的问题，我们将对您的反馈进行处理。</string>
+    <string name="suggest_confirm">提交反馈</string>
+    <string name="Contact_title">联系方式</string>
+    <string name="Contact_content">选填，便于我们和您取得联系</string>
 
 </resources>

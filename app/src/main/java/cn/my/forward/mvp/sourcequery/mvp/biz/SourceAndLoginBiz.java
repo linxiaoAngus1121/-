@@ -67,6 +67,7 @@ public class SourceAndLoginBiz implements ILogin {
     private boolean flag = false;    //判断是否是个人信息查询的标志位
     private String submitState;
     private Gson gson;
+    private boolean isfirst = true;    //默认是false,获取开始查询的viewstate的标志位
 
     private SourceAndLoginBiz() {
 
@@ -568,13 +569,13 @@ public class SourceAndLoginBiz implements ILogin {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (document != null) {
+        if (document != null && isfirst) {
             Elements elements = document.select("input");   //第一次进入是为了获取viewstate，同时判断是否需要查询数据
             //获取出第三个input标签
             Element element = elements.get(2);
             viewState = element.attr("value");
             MyLog.i("我走了getviewstate");
-            //  getdata(document, listener);
+            isfirst = false;
         }
         try {
             inputStream.close();
@@ -593,13 +594,13 @@ public class SourceAndLoginBiz implements ILogin {
     private void getdata(Document document, IExamListener listener) {
         if (document != null) {
             //这里需要再一次判断，第一次有没有数据，没有签的话没有只有一个<tr>标签，直接return 回去
-            MyLog.i("doucement不为空");
+            MyLog.i("doucement不为空" + document.html());
             if (hasData(document)) {
                 //进行数据解析
                 MyLog.i("hasdata为true");
                 pastExamData(document, listener);
             } else {
-                if ((listener != null)) {
+                if (listener != null) {
                     listener.showExamError("这学期还没有数据哟");
                 }
             }

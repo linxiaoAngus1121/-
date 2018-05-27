@@ -96,7 +96,7 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
         MyLog.i(list.size() + "返回的list长度");
         Toast.makeText(this, "查询成功", Toast.LENGTH_SHORT).show();
         if (adapter != null) {
-            MyLog.i("adapter为空");
+            MyLog.i("adapter不为空");
             mList.clear();
             mList.addAll(list);
             adapter.notifyDataSetChanged();
