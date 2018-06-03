@@ -103,7 +103,7 @@
         android:layout_alignEnd="@id/content"
         android:layout_below="@id/content"
         android:background="@drawable/sorce_buttonk"
-        android:text="@string/query"
+        android:text="@string/login"
         />
 
 

@@ -82,18 +82,17 @@
         </activity>
         <activity android:name=".PersonInformationActivity">
         </activity>
-
-        <service
-            android:name=".service.LoginService"
-            android:enabled="true"
-            android:exported="false"/>
-
         <activity android:name=".QuestionSurveyActivity">
         </activity>
         <activity android:name=".TicketsActivity">
         </activity>
         <activity android:name=".FeedBackActivity">
         </activity>
+
+        <service
+            android:name=".service.LoginService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="15dp"
-        android:text="确定"
+        android:text="@string/ok"
         android:textColor="#ff000000"/>
 
 </LinearLayout>

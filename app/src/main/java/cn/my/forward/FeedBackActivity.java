@@ -1,5 +1,6 @@
 package cn.my.forward;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -7,6 +8,7 @@ import android.text.Selection;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -26,16 +28,15 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
     private EditText mContactEd;    //联系方式的Editext
     private android.os.AsyncTask<String, Void, Void> task;
     private static final int MAX_SUM = 140;
-    private String format1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_back);
-        mEt = (EditText) findViewById(R.id.content);
-        mBt = (Button) findViewById(R.id.confirm_suggest);
-        mTv = (TextView) findViewById(R.id.show_sum);
-        mContactEd = (EditText) findViewById(R.id.contact);
+        mEt = findViewById(R.id.content);
+        mBt = findViewById(R.id.confirm_suggest);
+        mTv = findViewById(R.id.show_sum);
+        mContactEd = findViewById(R.id.contact);
         mBt.setOnClickListener(this);
         extra = getIntent().getParcelableExtra("information");
         mEt.addTextChangedListener(new TextWatcher() {  //监听上面字数的变化
@@ -75,7 +76,7 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onClick(View v) {
-
+        toclosekeyboard();
         if (TextUtils.isEmpty(mEt.getText().toString())) {
             Toast.makeText(this, "请输入您的意见建议哟", Toast.LENGTH_SHORT).show();
             return;
@@ -86,6 +87,20 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
                         extra.getStuPs());
     }
 
+
+    /**
+     * 关闭软键盘
+     */
+    public void toclosekeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context
+                .INPUT_METHOD_SERVICE);
+        if (imm.isActive() && getCurrentFocus() != null) {
+            if (getCurrentFocus().getWindowToken() != null) {
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
+    }
 
     @Override
     protected void onDestroy() {

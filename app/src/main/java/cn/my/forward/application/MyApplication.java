@@ -19,5 +19,7 @@ public class MyApplication extends Application {
         // 重要：如果有对webview设置过webchromeclient，则需要调用trackWebView() 接口将WebChromeClient对象传入，
         // 否则开发者自定义的回调无法收到。
         StatService.autoTrace(this, true, true);
+
+
     }
 }

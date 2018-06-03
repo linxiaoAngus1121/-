@@ -44,77 +44,77 @@
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="一"
+                    android:text="@string/one"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="二"
+                    android:text="@string/two"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="三"
+                    android:text="@string/three"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="四"
+                    android:text="@string/four"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="五"
+                    android:text="@string/five"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="六"
+                    android:text="@string/six"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="七"
+                    android:text="@string/serven"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="八"
+                    android:text="@string/eight"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="九"
+                    android:text="@string/night"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="十"
+                    android:text="@string/ten"
                     android:textSize="12sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:gravity="center"
-                    android:text="十一"
+                    android:text="@string/tweel"
                     android:textSize="12sp"/>
 
 

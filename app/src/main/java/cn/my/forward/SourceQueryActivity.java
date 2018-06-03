@@ -73,9 +73,9 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scorequery);
         mlist = new ArrayList<>();
-        Spinner mSpinner = (Spinner) findViewById(R.id.scoure_query_sp);
-        RecyclerView mLv = (RecyclerView) findViewById(R.id.scoure_data_lv);
-        bar = (ProgressBar) findViewById(R.id.scpure_bar);
+        Spinner mSpinner = findViewById(R.id.scoure_query_sp);
+        RecyclerView mLv = findViewById(R.id.scoure_data_lv);
+        bar = findViewById(R.id.scpure_bar);
         String stuNo = getIntent().getStringExtra("stu_no");
         mSpinner.setAdapter(initDataForAdapter(stuNo));
         presenter.scoureQuery("");//历年成绩查询
@@ -117,7 +117,7 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
         bar.setVisibility(View.GONE);
         mlist.clear();
         mlist.addAll(list);
-        adapter.notifyDataSetChanged(); //更新数据源，提示listview刷新
+         adapter.notifyDataSetChanged(); //更新数据源，提示listview刷新
         if (list.size() == 0) {
             Toast.makeText(this, "这学期还没有数据哟", Toast.LENGTH_SHORT).show();
         }

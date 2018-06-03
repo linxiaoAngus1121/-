@@ -244,7 +244,6 @@ public class SourcePresenter {
                         if (mLoginView != null) {
                             mLoginView.showCode(inputStream);
                         }
-
                     }
                 });
 

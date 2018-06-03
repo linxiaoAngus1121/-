@@ -29,8 +29,8 @@ public class ChoiseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choise);
-        mGridView = (GridView) findViewById(R.id.choise_grid);
-        TextView tv = (TextView) findViewById(R.id.choise_showName_tv);
+        mGridView = findViewById(R.id.choise_grid);
+        TextView tv = findViewById(R.id.choise_showName_tv);
         extra = getIntent().getParcelableExtra("information");
         mlist = new ArrayList<>();
         initAdapter();
@@ -63,20 +63,23 @@ public class ChoiseActivity extends AppCompatActivity {
                         mIntent = new Intent(ChoiseActivity.this, PersonInformationActivity.class);
                         mlist.add("个人信息查询");
                         break;
-                    case 5:
+                    case 5:     //问卷调查
                         //   mIntent = new Intent(ChoiseActivity.this, QuestionSurveyActivity
                         // .class);
-                        Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)
-                                .show();
-                        break;
-                    case 6:
-                        Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)
-                                .show();
-                        break;
-                    case 7:
                         mIntent = new Intent(ChoiseActivity.this, TicketsActivity
                                 .class);
                         mlist.add("火车票查询");
+                        break;
+                    case 6:
+                       Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)
+                                .show();
+                        break;
+                    case 7: //退出系统
+                        mIntent = new Intent(ChoiseActivity.this, MainActivity.class);
+                        mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(mIntent);
+                        finish();
                         break;
                     case 8: //bug反馈
                         mIntent = new Intent(ChoiseActivity.this, FeedBackActivity

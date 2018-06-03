@@ -2,14 +2,11 @@ package cn.my.forward;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -38,18 +35,6 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
     private RecyclerView mShow_data;
     private SourcePresenter presenter = new SourcePresenter(this);
     private ProgressBar mpb;
-    private boolean isflag = true;
-    //注意，此处会发生内存泄露问题，所以，退出这个页面的时候，一定要把handler的消息全部去除并设置handler为空
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            long sysTime = System.currentTimeMillis();
-            String s = DateFormat.format("HH:mm:ss", sysTime).toString();
-            mTv_time.setText(s);
-        }
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +45,13 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
 
 
     private void bindViews() {
-        mEdit_from = (EditText) findViewById(R.id.edit_from);
-        mEdit_to = (EditText) findViewById(R.id.edit_to);
-        mTv_time = (TextView) findViewById(R.id.train_time);
-        mTv_date = (TextView) findViewById(R.id.train_pre_day);
-        mShow_data = (RecyclerView) findViewById(R.id.show_data);
-        mpb = (ProgressBar) findViewById(R.id.ticket_pb);
-        ImageView swap_iv = (ImageView) findViewById(R.id.swap_iv);
+        mEdit_from = findViewById(R.id.edit_from);
+        mEdit_to = findViewById(R.id.edit_to);
+        mTv_time = findViewById(R.id.train_time);
+        mTv_date = findViewById(R.id.train_pre_day);
+        mShow_data = findViewById(R.id.show_data);
+        mpb = findViewById(R.id.ticket_pb);
+        ImageView swap_iv = findViewById(R.id.swap_iv);
         findViewById(R.id.confirm).setOnClickListener(this);
         swap_iv.setOnClickListener(this);
         mShow_data.setLayoutManager(new LinearLayoutManager(this));
@@ -89,7 +74,7 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
         SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault());
         int i = can.get(Calendar.DAY_OF_WEEK);
         mTv_date.setText(df.format(day) + "  " + s[i - 1]);
-        new Thread(new Runnable() {
+      /*  new Thread(new Runnable() {
             @Override
             public void run() {
                 while (isflag) {
@@ -104,7 +89,7 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
                     }
                 }
             }
-        }).start();
+        }).start();*/
     }
 
 
@@ -184,9 +169,6 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
         super.onDestroy();
         presenter.clearAll();
         presenter = null;
-        isflag = false;
-        handler.removeMessages(0x110);  //移除指定的消息，并把handler置空
-        handler = null;
     }
 
 

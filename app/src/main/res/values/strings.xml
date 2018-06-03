@@ -2,7 +2,7 @@
     <string name="app_name">教务系统</string>
     <string name="ed_ps">请输入密码</string>
     <string name="ed_code">请输入验证码</string>
-    <string name="query">登陆</string>
+    <string name="login">登陆</string>
     <string name="className">课程名称</string>
     <string name="ClassScore">课程成绩</string>
     <string name="stuNo">请输入学号</string>
@@ -31,5 +31,21 @@
     <string name="suggest_confirm">提交反馈</string>
     <string name="Contact_title">联系方式</string>
     <string name="Contact_content">选填，便于我们和您取得联系</string>
+    <string name="question_servey">问卷调查</string>
+    <string name="confirm">提交</string>
+    <string name="query">查询</string>
+    <string name="one">一</string>
+    <string name="two">二</string>
+    <string name="three">三</string>
+    <string name="four">四</string>
+    <string name="five">五</string>
+    <string name="six">六</string>
+    <string name="serven">七</string>
+    <string name="eight">八</string>
+    <string name="night">九</string>
+    <string name="ten">十</string>
+    <string name="tweel">十一</string>
+    <string name="erdengzuo">二等座</string>
+    <string name="ok">确定</string>
 
 </resources>

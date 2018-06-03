@@ -63,7 +63,7 @@
             android:id="@+id/seat"
             style="@style/TrainTicket"
             android:layout_weight="0.2"
-            android:text="二等座"/>
+            android:text="@string/erdengzuo"/>
 
         <TextView
             android:id="@+id/remain_num"

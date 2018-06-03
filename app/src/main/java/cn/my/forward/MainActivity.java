@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.StrictMode;
 import android.text.TextUtils;
 import android.view.View;
@@ -16,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
@@ -32,6 +35,8 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     private Button mButton;
     private SourcePresenter presenter = new SourcePresenter(this);
     private static final String FILE_NAME = "MyPs";
+    private static final String FILE_PATH = Environment.getExternalStorageDirectory() + File
+            .separator + "tupian.png";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +52,12 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         SharedPreferences preferences = getSharedPreferences(FILE_NAME, MODE_PRIVATE);
         String no = preferences.getString("no", "");
         String ps = preferences.getString("ps", "");
-        mEditnum = (EditText) findViewById(R.id.ed_num);
-        mEditPass = (cn.my.forward.customview.MyPsEditText) findViewById(R.id.edit_password);
-        miv = (ImageView) findViewById(R.id.showCode);
-        mButton = (Button) findViewById(R.id.finalto);
-        editText = (EditText) findViewById(R.id.edit_ps);
-        mCheckBox = (CheckBox) findViewById(R.id.activity_main_remberps_cb);
+        mEditnum = findViewById(R.id.ed_num);
+        mEditPass = findViewById(R.id.edit_password);
+        miv = findViewById(R.id.showCode);
+        mButton = findViewById(R.id.finalto);
+        editText = findViewById(R.id.edit_ps);
+        mCheckBox = findViewById(R.id.activity_main_remberps_cb);
         miv.setOnClickListener(this);
         mButton.setOnClickListener(this);
         mEditnum.setText(no);
@@ -60,6 +65,7 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         //预备登陆
         presenter.prepareLogin();
     }
+
 
     @Override
     public String getstudNo() {
@@ -79,9 +85,47 @@ public class MainActivity extends BaseActivity implements ILoginView, View
 
     @Override
     public void showCode(InputStream inputStream) {
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-        miv.setImageBitmap(bitmap);
+        try {
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            miv.setImageBitmap(bitmap);
+            FileOutputStream outputStream = new FileOutputStream(FILE_PATH);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // recognition();
     }
+
+  /*  private void recognition() {
+        if (OCR.getInstance().getAccessToken() != null) {
+            // 通用文字识别参数设置
+            GeneralBasicParams param = new GeneralBasicParams();
+            param.setDetectDirection(true);
+            param.setImageFile(new File(FILE_PATH));
+            //高精度版本
+            OCR.getInstance().recognizeAccurateBasic(param, new OnResultListener<GeneralResult>() {
+                @Override
+                public void onResult(GeneralResult generalResult) {
+                    // 调用成功，返回GeneralResult对象
+                    StringBuilder sb = new StringBuilder();
+                    for (WordSimple wordSimple : generalResult.getWordList()) {
+                        // wordSimple不包含位置信息
+                        sb.append(wordSimple.getWords());
+                        editText.setText(wordSimple.getWords());
+                    }
+                    MyLog.i(sb.toString() + "***");
+                }
+
+                @Override
+                public void onError(OCRError ocrError) {
+                    MyLog.i("调用失败");
+                }
+            });
+        }
+
+    }*/
 
     @Override
     public void showCodeError(String s) {
@@ -178,7 +222,6 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         super.onDestroy();
         presenter.clearAll();
         presenter = null;
-        finish();
     }
 
 }
