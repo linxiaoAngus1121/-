@@ -45,13 +45,13 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
 
 
     private void bindViews() {
-        mEdit_from = findViewById(R.id.edit_from);
-        mEdit_to = findViewById(R.id.edit_to);
-        mTv_time = findViewById(R.id.train_time);
-        mTv_date = findViewById(R.id.train_pre_day);
-        mShow_data = findViewById(R.id.show_data);
-        mpb = findViewById(R.id.ticket_pb);
-        ImageView swap_iv = findViewById(R.id.swap_iv);
+        mEdit_from = (EditText) findViewById(R.id.edit_from);
+        mEdit_to = (EditText) findViewById(R.id.edit_to);
+        mTv_time = (TextView) findViewById(R.id.train_time);
+        mTv_date = (TextView) findViewById(R.id.train_pre_day);
+        mShow_data = (RecyclerView) findViewById(R.id.show_data);
+        mpb = (ProgressBar) findViewById(R.id.ticket_pb);
+        ImageView swap_iv = (ImageView) findViewById(R.id.swap_iv);
         findViewById(R.id.confirm).setOnClickListener(this);
         swap_iv.setOnClickListener(this);
         mShow_data.setLayoutManager(new LinearLayoutManager(this));

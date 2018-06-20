@@ -15,6 +15,7 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IExamListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IGetCodeListtener;
+import cn.my.forward.mvp.sourcequery.mvp.biz.ILePaiListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.ILevelListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.ILogin;
 import cn.my.forward.mvp.sourcequery.mvp.biz.IOnLoginListener;
@@ -25,6 +26,7 @@ import cn.my.forward.mvp.sourcequery.mvp.biz.ITimeTableListener;
 import cn.my.forward.mvp.sourcequery.mvp.biz.SourceAndLoginBiz;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IExamView;
+import cn.my.forward.mvp.sourcequery.mvp.view.ILePaiView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILevealView;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
 import cn.my.forward.mvp.sourcequery.mvp.view.IPersonView;
@@ -46,6 +48,7 @@ public class SourcePresenter {
     private IPersonView mPerson;
     private ITicketsView ticketsView;
     private ILoginView mLoginView;
+    private ILePaiView lpView;
     //private IQuestionView questionview;
     private Bean_l bean01;
     private Handler mhalder = new Handler(Looper.getMainLooper());  //让handler运行在主线程中
@@ -66,6 +69,8 @@ public class SourcePresenter {
             mLoginView = (ILoginView) view;
         } else if (view instanceof ITicketsView) {
             ticketsView = (ITicketsView) view;
+        } else if (view instanceof ILePaiView) {
+            lpView = (ILePaiView) view;
         } else {
             try {
                 throw new Exception("大哥，你错了");
@@ -284,11 +289,12 @@ public class SourcePresenter {
         String to = ticketsView.getTo();
         sourceQuery.tickets(from, to, new ITickedListener() {
             @Override
-            public void getDataSuccess(final Bean_ticket ticket, final Bean_SpareTicket spareTicket) {
+            public void getDataSuccess(final Bean_ticket ticket, final Bean_SpareTicket
+                    spareTicket) {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
-                        ticketsView.showTicketData(ticket,spareTicket);
+                        ticketsView.showTicketData(ticket, spareTicket);
                     }
                 });
             }
@@ -405,6 +411,31 @@ public class SourcePresenter {
         });
     }
 
+    public void lePai(String path) {
+        lpView.showDialog();
+        sourceQuery.lepai(path, new ILePaiListener() {
+            @Override
+            public void getDataSuccess(final String s) {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        lpView.showInformationSuccess(s);
+                    }
+                });
+            }
+
+            @Override
+            public void getCodeFailure(final String s) {
+                mhalder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        lpView.showInformationFailure(s);
+                    }
+                });
+            }
+        });
+    }
+
     public void clearAll() {
         if (mLoginView != null) {
             mLoginView = null;
@@ -426,6 +457,9 @@ public class SourcePresenter {
         }
         if (ticketsView != null) {
             ticketsView = null;
+        }
+        if (lpView != null) {
+            lpView = null;
         }
     }
 

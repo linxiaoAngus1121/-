@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <SurfaceView
+        android:id="@+id/show_camera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <!--  android:background="@drawable/back"-->
+    <TextView
+        android:id="@+id/tv_showresult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@color/colorRed"
+        android:textSize="60sp"
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:id="@+id/iv_lepai_takepicture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="30dp"
+        android:src="@drawable/takepicture"
+        />
+
+    <ImageView
+        android:id="@+id/iv_lepai_tranform"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginBottom="30dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/camera"
+        />
+</FrameLayout>

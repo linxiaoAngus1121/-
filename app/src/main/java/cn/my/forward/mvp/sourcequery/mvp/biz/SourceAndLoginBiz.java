@@ -15,10 +15,12 @@ import org.jsoup.select.Elements;
 import org.jsoup.select.Selector;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,6 +42,8 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_ticketResult;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.TimeTableBean;
+import cn.my.forward.mvp.sourcequery.mvp.bean.lepai.Beauty;
+import cn.my.forward.mvp.sourcequery.mvp.bean.lepai.JsonRootBean;
 import cn.my.forward.mvp.sourcequery.mvp.utils.CoursePages;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.okhttp.MyOkhttp;
@@ -125,7 +129,7 @@ public class SourceAndLoginBiz implements ILogin {
         final String url = "http://jwxt.sontan.net/xsdjkscx.aspx?xh=" + bean.getStuNo() + "&xm=" +
                 stuName + "&gnmkdm=N121606";
         MyLog.i(url);
-        //这里考虑使用SparseArray，但是SparseArray的key不可为stringx,所以用不了
+        //这里考虑使用SparseArray，但是SparseArray的key不可为string,所以用不了
         Map<String, String> map = new HashMap<>();
         map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;" +
                 "q=0.8");
@@ -157,6 +161,80 @@ public class SourceAndLoginBiz implements ILogin {
     @Override
     public void personInfomation(IPersonListener listener) {
         GetPersonData(listener);
+    }
+
+    @Override
+    public void lepai(String path, ILePaiListener lePaiListener) {
+        getLepai(path, lePaiListener);
+    }
+
+    private void getLepai(String path, final ILePaiListener lePaiListener) {
+        if (lePaiListener == null) {
+            return;
+        }
+        final File file = new File(path);
+        String url = "https://api-cn.faceplusplus.com/facepp/v3/detect";
+        if (file.exists()) {
+            MyLog.i("存在");
+            MyLog.i(file.getPath());
+        } else {
+            lePaiListener.getCodeFailure("出了点问题，请重新选择图片");
+            MyLog.i("不存在");
+            return;
+        }
+        if (determineWhetherTheSizeExceeds2M(file)) {
+            MyLog.i("大小超过2M");
+            lePaiListener.getCodeFailure("图片不可以超过2M哟");
+            return;
+        } else {
+            MyLog.i("大小没有超过2M");
+        }
+        instance.testPost(url, file, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                MyLog.i("失败");
+                lePaiListener.getCodeFailure("出了点问题，请重新选择图片");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                MyLog.i("成功");
+                String string = response.body().string();
+                Gson gson = new Gson();
+                MyLog.i(string);
+                JsonRootBean rootBean = gson.fromJson(string, JsonRootBean
+                        .class);
+                if (null == rootBean.getFaces()) {
+                    lePaiListener.getCodeFailure("请求过于频繁");
+                    return;
+                }
+                if (rootBean.getFaces().size() != 0) {
+                    MyLog.i("face数组有东西");
+                    Beauty beauty = rootBean.getFaces().get(0).getAttributes().getBeauty();
+                    MyLog.i(beauty.toString());
+                    double male_score = beauty.getMale_score();
+                    double female_score = beauty.getFemale_score();
+                    DecimalFormat df = new DecimalFormat("######0.00");
+                    lePaiListener.getDataSuccess(df.format((male_score + female_score) / 2));
+                } else {                        //没有人脸的情况下
+                    MyLog.i("face数组没有东西");
+                    lePaiListener.getCodeFailure("未检测到人脸");
+                }
+
+            }
+        });
+    }
+
+    /**
+     * 判断是否超过2M
+     *
+     * @param file 文件
+     */
+    private boolean determineWhetherTheSizeExceeds2M(File file) {
+        long length = file.length();
+        int MaxSize = 1024 * 1024 * 2;//定义MB的计算常量
+        return length > MaxSize;
+
     }
 
     @Override
@@ -499,7 +577,6 @@ public class SourceAndLoginBiz implements ILogin {
                 been.add(bean);
             }
             listener.showResultSucceed(been);
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -980,13 +1057,16 @@ public class SourceAndLoginBiz implements ILogin {
         }
 
         String[] split = replace.split("<br>");
+        String className = split[1];
         for (int i = 1; i < split.length; i = i + 5) {
-
+            if (!split[i].equals(className)) {
+                i = i - 5 + 1;
+                continue;
+            }
             TimeTableBean mTimeBean = new TimeTableBean();
             for (int j = i; j <= i + 3; j++) {
                 String t = removeHtml(split[j]);
-                assert t != null;
-                if (t.equals("空")) {
+                if (t != null && t.equals("空")) {
                     break;
                 }
                 if (j == i) {   //课程名

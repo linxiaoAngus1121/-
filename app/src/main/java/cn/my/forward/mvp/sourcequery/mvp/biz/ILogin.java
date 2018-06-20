@@ -32,6 +32,7 @@ public interface ILogin {
 
     //  void questionSubmit(List<String> list, ISubmitListener listener);
 
+    void lepai(String path, ILePaiListener lePaiListener);
 
     void tickets(String from, String to, ITickedListener listener);
 }

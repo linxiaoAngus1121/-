@@ -1,14 +1,18 @@
 package cn.my.forward.okhttp;
 
 
+import java.io.File;
 import java.util.Map;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * Created by 123456 on 2018/2/10.
@@ -40,7 +44,30 @@ public class MyOkhttp {
     public void testGet(String url, Callback callback) {
         Request builder = new Request.Builder().get().url(url).build();
         client.newCall(builder).enqueue(callback);
+    }
 
+
+    /**
+     * 颜值评分
+     *
+     * @param url      地址
+     * @param file     图片文件
+     * @param callback 回调监听
+     */
+    public void testPost(String url, File file, Callback callback) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("image/png"), file);
+        MultipartBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("api_key", "26D4YXJP1ugn0kMlHcvxboAp0qjyeQIW")
+                .addFormDataPart("api_secret", "CSd1A9YO5gkqlV0X1UREz052rHrcZpi3")
+                //注意这里,如果需要返回多个属性的话，这样子写
+                /*.addFormDataPart("return_attributes", "gender,emotion,age,beauty,ethnicity," +
+                        "eyestatus")*/
+                .addFormDataPart("return_attributes", "beauty")
+                .addFormDataPart("image_file", "image_file", requestBody)
+                .build();
+        final Request request = new Request.Builder().url(url).post(body).build();
+        client.newCall(request).enqueue(callback);
     }
 
 

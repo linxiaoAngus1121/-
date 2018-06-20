@@ -20,7 +20,7 @@ import cn.my.forward.R;
 
 public class MyAdapter extends BaseAdapter {
 
-    private String[] title = {"成绩查询", "课表查询", "考试查询", "4、6级", "个人信息", "火车汽车票", "密码修改", "重新登陆",
+    private String[] title = {"成绩查询", "课表查询", "考试查询", "4、6级", "个人信息", "火车汽车票", "颜值评分", "重新登陆",
             "错误反馈"
     };
     private List<Drawable> picture = new ArrayList<>();

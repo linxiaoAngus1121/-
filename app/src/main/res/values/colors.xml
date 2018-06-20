@@ -18,4 +18,5 @@
     <color name="colorDarkSalmon">#E9967A</color>
     <color name="colorLavender">#E6E6FA</color>
     <color name="colorDarkGreen">#f9b68b</color>
+    <color name="colorRed">#FF0000</color>
 </resources>

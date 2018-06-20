@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import cn.my.forward.customview.MyPsEditText;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
@@ -52,12 +53,12 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         SharedPreferences preferences = getSharedPreferences(FILE_NAME, MODE_PRIVATE);
         String no = preferences.getString("no", "");
         String ps = preferences.getString("ps", "");
-        mEditnum = findViewById(R.id.ed_num);
-        mEditPass = findViewById(R.id.edit_password);
-        miv = findViewById(R.id.showCode);
-        mButton = findViewById(R.id.finalto);
-        editText = findViewById(R.id.edit_ps);
-        mCheckBox = findViewById(R.id.activity_main_remberps_cb);
+        mEditnum = (EditText) findViewById(R.id.ed_num);
+        mEditPass = (MyPsEditText) findViewById(R.id.edit_password);
+        miv = (ImageView) findViewById(R.id.showCode);
+        mButton = (Button) findViewById(R.id.finalto);
+        editText = (EditText) findViewById(R.id.edit_ps);
+        mCheckBox = (CheckBox) findViewById(R.id.activity_main_remberps_cb);
         miv.setOnClickListener(this);
         mButton.setOnClickListener(this);
         mEditnum.setText(no);

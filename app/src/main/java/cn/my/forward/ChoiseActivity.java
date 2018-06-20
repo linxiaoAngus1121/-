@@ -29,8 +29,8 @@ public class ChoiseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choise);
-        mGridView = findViewById(R.id.choise_grid);
-        TextView tv = findViewById(R.id.choise_showName_tv);
+        mGridView = (GridView) findViewById(R.id.choise_grid);
+        TextView tv = (TextView) findViewById(R.id.choise_showName_tv);
         extra = getIntent().getParcelableExtra("information");
         mlist = new ArrayList<>();
         initAdapter();
@@ -71,8 +71,9 @@ public class ChoiseActivity extends AppCompatActivity {
                         mlist.add("火车票查询");
                         break;
                     case 6:
-                       Toast.makeText(ChoiseActivity.this, "功能即将开放，请客官稍等", Toast.LENGTH_SHORT)
-                                .show();
+                        mIntent = new Intent(ChoiseActivity.this, LePaiActivity
+                                .class);
+                        mlist.add("颜值评分");
                         break;
                     case 7: //退出系统
                         mIntent = new Intent(ChoiseActivity.this, MainActivity.class);
@@ -110,6 +111,10 @@ public class ChoiseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         //先试试在这里进行上传
+        upload();
+    }
+
+    private void upload() {
         Intent intentforward = new Intent(this, LoginService.class);
         intentforward.putExtra("information", extra);
         intentforward.putStringArrayListExtra("list", mlist);

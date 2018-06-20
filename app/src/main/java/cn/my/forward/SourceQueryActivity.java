@@ -73,9 +73,9 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scorequery);
         mlist = new ArrayList<>();
-        Spinner mSpinner = findViewById(R.id.scoure_query_sp);
-        RecyclerView mLv = findViewById(R.id.scoure_data_lv);
-        bar = findViewById(R.id.scpure_bar);
+        Spinner mSpinner = (Spinner) findViewById(R.id.scoure_query_sp);
+        RecyclerView mLv = (RecyclerView) findViewById(R.id.scoure_data_lv);
+        bar = (ProgressBar) findViewById(R.id.scpure_bar);
         String stuNo = getIntent().getStringExtra("stu_no");
         mSpinner.setAdapter(initDataForAdapter(stuNo));
         presenter.scoureQuery("");//历年成绩查询

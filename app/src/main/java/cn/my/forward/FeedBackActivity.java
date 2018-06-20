@@ -33,10 +33,10 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_back);
-        mEt = findViewById(R.id.content);
-        mBt = findViewById(R.id.confirm_suggest);
-        mTv = findViewById(R.id.show_sum);
-        mContactEd = findViewById(R.id.contact);
+        mEt = (EditText) findViewById(R.id.content);
+        mBt = (Button) findViewById(R.id.confirm_suggest);
+        mTv = (TextView) findViewById(R.id.show_sum);
+        mContactEd = (EditText) findViewById(R.id.contact);
         mBt.setOnClickListener(this);
         extra = getIntent().getParcelableExtra("information");
         mEt.addTextChangedListener(new TextWatcher() {  //监听上面字数的变化
