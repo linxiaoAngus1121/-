@@ -3,6 +3,6 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/photoAlbum"
-        android:title="相册"
+        android:title="@string/album"
         app:showAsAction="always"/>
 </menu>

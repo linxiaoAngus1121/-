@@ -90,6 +90,7 @@ public class MyBaseAdapter extends BaseAdapter {
             layoutParams.height = 800;
             viewHolder.mTv.setLayoutParams(layoutParams);
         }
+        //将数据设置到页面
         if (!getItem(position).equals("空")) {
             viewHolder.mTv.setText((String) getItem(position));
             viewHolder.mTv.setTextColor(Color.WHITE);

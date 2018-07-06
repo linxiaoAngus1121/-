@@ -3,7 +3,6 @@ package cn.my.forward;
 import android.app.ProgressDialog;
 import android.content.ContentUris;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -35,6 +34,9 @@ import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILePaiView;
 
+/**
+ * 颜值评分
+ */
 public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Callback, ILePaiView,
         View.OnClickListener {
     private static final int DEPOT_CODE = 1;
@@ -63,6 +65,10 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_le_pai);
+        init();
+    }
+
+    private void init() {
         mTv = (TextView) findViewById(R.id.tv_showresult);
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.show_camera);
         ImageView mIv = (ImageView) findViewById(R.id.iv_lepai_tranform);
@@ -92,15 +98,29 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
                 if (resultCode == RESULT_CANCELED) {
                     return;//没有选择图片
                 }
-                if (Build.VERSION.SDK_INT >= 19) {  //7.0
+                if (Build.VERSION.SDK_INT >= 19) {  //android7.0
+                    //获取图片路径
                     handlerImageOnkitKat(data);
                 } else {
                     handlerImagebeforekitKat(data);
                 }
+                //开始上传图片
                 presenter.lePai(imagePath);
                 break;
         }
     }
+
+    //展示分数
+    @Override
+    public void showInformationSuccess(String s) {
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        //回显数据成功
+        mTv.setText(s);
+        mTv.setVisibility(View.VISIBLE);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -126,10 +146,10 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
     private void handlerImagebeforekitKat(Intent data) {
         imageUri = data.getData();
-        imagePath = getImagePath(imageUri, null);
+        imagePath = presenter.getImagePath(this, imageUri, null);
     }
 
-    private String getImagePath(Uri externalContentUri, String selection) {
+/*    private String getImagePath(Uri externalContentUri, String selection) {
         String path = null;
         Cursor cursor = getContentResolver().query(externalContentUri, null, selection, null, null);
         if (cursor != null) {
@@ -139,7 +159,7 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
             cursor.close();
         }
         return path;
-    }
+    }*/
 
     private void handlerImageOnkitKat(Intent data) {
         imageUri = data.getData();
@@ -148,14 +168,14 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
             if ("com.android.providers.media.documents".equals(imageUri.getAuthority())) {
                 String id = documentId.split(":")[1];
                 String selection = MediaStore.Images.Media._ID + "=" + id;
-                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
+                imagePath = presenter.getImagePath(this,MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
             } else if ("com.android.downloads.documents".equals(imageUri.getAuthority())) {
                 Uri contentUri = ContentUris.withAppendedId(Uri.parse
                         ("content://downloads/public_downloads"), Long.valueOf(documentId));
-                imagePath = getImagePath(contentUri, null);
+                imagePath = presenter.getImagePath(this,contentUri, null);
             }
         } else if ("content".equalsIgnoreCase(imageUri.getScheme())) {
-            imagePath = getImagePath(imageUri, null);
+            imagePath = presenter.getImagePath(this,imageUri, null);
         } else if ("file".equalsIgnoreCase(imageUri.getScheme())) {
             imagePath = imageUri.getPath();
         }
@@ -309,16 +329,6 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
         }
     }
 
-    @Override
-    public void showInformationSuccess(String s) {
-        if (dialog.isShowing()) {
-            dialog.dismiss();
-        }
-        //回显数据成功
-        // Toast.makeText(this, "数据显示成功", Toast.LENGTH_SHORT).show();
-        mTv.setText(s);
-        mTv.setVisibility(View.VISIBLE);
-    }
 
     @Override
     public void showInformationFailure(String s) {
@@ -359,6 +369,7 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
         super.onDestroy();
     }
 
+    //点击拍照按钮，或者切换摄像头
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -382,7 +393,7 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
                     public void onPictureTaken(byte[] data, Camera camera) {
                         Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                         Matrix m = new Matrix();
-                        if (CURRENTCAMERATYPE == FRONT) {   //当前是前置的
+                        if (CURRENTCAMERATYPE == FRONT) {   //当前是前置的，旋转调正
                             m.setRotate(-90, (float) bitmap.getWidth() / 2, (float) bitmap
                                     .getHeight()
                                     / 2);

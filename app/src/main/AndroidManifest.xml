@@ -68,31 +68,31 @@
             android:name="BaiduMobAd_WIFI_LOCATION"
             android:value="true"/>
 
-        <activity android:name=".SourceQueryActivity">
+        <activity android:name=".SourceQueryActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".BaseActivity"/>
-        <activity android:name=".MainActivity">
+        <activity android:name=".BaseActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".MainActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".TimeTableActivity">
+        <activity android:name=".TimeTableActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".ChoiseActivity">
+        <activity android:name=".ChoiseActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".ExamActivity">
+        <activity android:name=".ExamActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".LevelActivity">
+        <activity android:name=".LevelActivity" android:screenOrientation="portrait" >
         </activity>
-        <activity android:name=".PersonInformationActivity">
+        <activity android:name=".PersonInformationActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".QuestionSurveyActivity">
+        <activity android:name=".QuestionSurveyActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".TicketsActivity">
+        <activity android:name=".TicketsActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".FeedBackActivity">
+        <activity android:name=".FeedBackActivity" android:screenOrientation="portrait">
         </activity>
 
         <service

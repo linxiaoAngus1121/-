@@ -39,16 +39,15 @@ public class LevelActivity extends AppCompatActivity implements ILevealView {
     }
 
 
+    //数据展示成功
     @Override
     public void showLevelData(ArrayList<LevelBean> been) {
         if (mPb != null) {
             mPb.setVisibility(View.GONE);
         }
         Toast.makeText(this, "查询成功", Toast.LENGTH_SHORT).show();
+        //适配器
         MyRecycleViewAdapterForLevel adapter = new MyRecycleViewAdapterForLevel(this, been);
-      //  Intent intent = new Intent(LevelActivity.this, UploadDataService.class);
-      //  intent.putExtra("list", been);
-     //   startService(intent);
         mRv.setAdapter(adapter);
     }
 

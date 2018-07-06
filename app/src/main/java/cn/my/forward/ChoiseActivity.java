@@ -17,6 +17,9 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.service.LoginService;
 
+/**
+ * 登陆成功后进入的页面
+ */
 public class ChoiseActivity extends AppCompatActivity {
 
     private Intent mIntent;

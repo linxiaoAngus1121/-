@@ -6,7 +6,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -19,6 +18,9 @@ import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IExamView;
 
+/**
+ * 考试查询
+ */
 public class ExamActivity extends AppCompatActivity implements IExamView {
 
     private SourcePresenter presenter = new SourcePresenter(this);
@@ -32,15 +34,18 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
         setContentView(R.layout.activity_exam);
         Spinner mSpinner = (Spinner) findViewById(R.id.spinner);
         String stuNo = getIntent().getStringExtra("stu_no");
-        mSpinner.setAdapter(initDataForAdapter(stuNo));
+        mSpinner.setAdapter(presenter.initDataForAdapter(this, stuNo, false));
         mRv = (RecyclerView) findViewById(R.id.exam_show_recycleView);
         mRv.setLayoutManager(new LinearLayoutManager(this));
+
+        //上面是个spinner，这是点击事件
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //从0开始
                 MyLog.i(position + "选择的位置");
                 String parentItemAtPosition = (String) parent.getItemAtPosition(position);
+                //开始请求
                 presenter.examQuery(parentItemAtPosition);
             }
 
@@ -52,45 +57,8 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
     }
 
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.clearAll();
-        presenter = null;
-    }
 
-    /**
-     * 生成spinner适配器所需要的数据
-     *
-     * @param stuNo 根据学号
-     */
-    private ArrayAdapter<String> initDataForAdapter(String stuNo) {
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout
-                .simple_spinner_item, getList(stuNo.substring(0, 2)));
-        adapter.setDropDownViewResource(R.layout.activity_exam_sp_dropdown);
-        return adapter;
-    }
-
-    /**
-     * 返回数据源
-     *
-     * @param stuNo 学好
-     * @return 返回数据源list
-     */
-    private ArrayList<String> getList(String stuNo) {
-        ArrayList<String> list = new ArrayList<>();
-        int j = Integer.valueOf(stuNo) + 2000;    //2015
-        for (int i = j + 2; i >= j; i--) { //2018开始
-            for (int h = 2; h > 0; h--) {
-                String line = String.valueOf(i) + "-" + String.valueOf(i + 1) + "-" + String
-                        .valueOf(h);
-                list.add(line);
-            }
-        }
-        return list;
-    }
-
+    //查询考试的数据成功了，在这里传给adapter
     @Override
     public void showExam(List<ExamBean> list) {
         MyLog.i(list.size() + "返回的list长度");
@@ -103,6 +71,7 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
         } else {
             mList = new ArrayList<>();
             mList.addAll(list);
+            //适配器
             adapter = new MyRecycleViewAdapter(this, mList);
             mRv.setAdapter(adapter);
         }
@@ -110,10 +79,19 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
 
     @Override
     public void showError(String s) {
-        if(adapter!=null){
+        if (adapter != null) {
             mList.clear();
             adapter.notifyDataSetChanged();
         }
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
+
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.clearAll();
+        presenter = null;
     }
 }

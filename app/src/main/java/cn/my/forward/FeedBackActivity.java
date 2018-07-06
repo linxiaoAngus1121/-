@@ -18,7 +18,7 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.service.AsyncTask;
 
 /**
- * 意见反馈activity
+ * 意见反馈
  */
 public class FeedBackActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText mEt;
@@ -32,6 +32,8 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //设置页面
         setContentView(R.layout.activity_feed_back);
         mEt = (EditText) findViewById(R.id.content);
         mBt = (Button) findViewById(R.id.confirm_suggest);
@@ -52,6 +54,7 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             public void afterTextChanged(Editable s) {
+                //判断是否超过140个字
                 Editable editable = mEt.getText();
                 int sum = s.length();
                 if (sum > MAX_SUM) {
@@ -74,13 +77,16 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
     }
 
 
+    //点击提交反馈
     @Override
     public void onClick(View v) {
         toclosekeyboard();
+        //判断输入的内容是否为空
         if (TextUtils.isEmpty(mEt.getText().toString())) {
             Toast.makeText(this, "请输入您的意见建议哟", Toast.LENGTH_SHORT).show();
             return;
         }
+        //开启一个asyncTask
         task = new AsyncTask(getApplicationContext(), mBt)
                 .execute(mEt.getText().toString(), mContactEd.getText().toString(), extra.getName(),
                         extra.getStuNo(),

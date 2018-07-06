@@ -16,7 +16,7 @@ import okhttp3.RequestBody;
 
 /**
  * Created by 123456 on 2018/2/10.
- * 请求工具封装
+ * 网络请求工具封装
  */
 
 public class MyOkhttp {
@@ -170,6 +170,14 @@ public class MyOkhttp {
     }
 
 
+    /**
+     * post请求(考试查询)
+     * @param url 请求地址
+     * @param view viewstate
+     * @param s 参数信息
+     * @param map 请求头
+     * @param callback 回调监听
+     */
     public void PostExamRequest(String url, String view, String[] s, Map<String, String> map,
                                 Callback
                                         callback) {

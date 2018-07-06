@@ -2,7 +2,6 @@ package cn.my.forward;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -24,8 +23,12 @@ import java.io.InputStream;
 import cn.my.forward.customview.MyPsEditText;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
+import cn.my.forward.mvp.sourcequery.mvp.utils.ShareUtil;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
 
+/**
+ * 登陆页面
+ */
 public class MainActivity extends BaseActivity implements ILoginView, View
         .OnClickListener {
     private EditText editText;  //验证码
@@ -50,9 +53,12 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll()
                 .build();
         StrictMode.setThreadPolicy(policy);
-        SharedPreferences preferences = getSharedPreferences(FILE_NAME, MODE_PRIVATE);
+       /* SharedPreferences preferences = getSharedPreferences(FILE_NAME, MODE_PRIVATE);
         String no = preferences.getString("no", "");
-        String ps = preferences.getString("ps", "");
+        String ps = preferences.getString("ps", "");*/
+
+        String no = ShareUtil.getString(this, "no", "");
+        String ps = ShareUtil.getString(this, "ps", "");
         mEditnum = (EditText) findViewById(R.id.ed_num);
         mEditPass = (MyPsEditText) findViewById(R.id.edit_password);
         miv = (ImageView) findViewById(R.id.showCode);
@@ -160,10 +166,12 @@ public class MainActivity extends BaseActivity implements ILoginView, View
      * @param getstuPs 密码
      */
     private void remberPs(String s, String getstuPs) {
-        SharedPreferences.Editor edit = getSharedPreferences(FILE_NAME, MODE_PRIVATE).edit();
+      /*  SharedPreferences.Editor edit = getSharedPreferences(FILE_NAME, MODE_PRIVATE).edit();
         edit.putString("no", s);
         edit.putString("ps", getstuPs);
-        edit.apply();
+        edit.apply();*/
+        ShareUtil.putString(this, "no", s);
+        ShareUtil.putString(this, "ps", getstuPs);
     }
 
     @Override
@@ -221,8 +229,10 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //通过置空，可以防止内容泄露
         presenter.clearAll();
         presenter = null;
+
     }
 
 }

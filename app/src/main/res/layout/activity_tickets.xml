@@ -78,12 +78,6 @@
             android:layout_weight="0.7"
             android:gravity="start"
             />
-        <TextView
-            android:id="@+id/train_time"
-            style="@style/TrainTicket"
-            android:layout_weight="0.5"
-            android:gravity="start"
-            />
 
         <Button
             android:id="@+id/confirm"

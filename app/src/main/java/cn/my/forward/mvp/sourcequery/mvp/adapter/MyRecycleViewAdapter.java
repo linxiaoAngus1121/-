@@ -26,7 +26,7 @@ public class MyRecycleViewAdapter extends RecyclerView.Adapter<MyRecycleViewAdap
         this.mList = mList;
         this.mContext = mContext;
     }
-
+    //初始化每个item的布局
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.activity_exam_recycle_item,
@@ -36,8 +36,11 @@ public class MyRecycleViewAdapter extends RecyclerView.Adapter<MyRecycleViewAdap
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        //科目
         holder.mtv_subject.setText(mList.get(position).getSubject());
+        //时间
         holder.mtv_time.setText(mList.get(position).getTime());
+        //地点+座位号
         holder.mtv_address.setText(mList.get(position).getAddress_no());
 
     }

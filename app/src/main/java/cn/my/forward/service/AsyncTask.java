@@ -21,6 +21,7 @@ public class AsyncTask extends android.os.AsyncTask<String, Void, Void> {
 
     private Context context;
     private Button mBt;
+    public static  final String URL="insert into bug(content,contact,submitter,bug_no) values(?,?,?,?)";
 
     public AsyncTask(Context applicationContext, Button mBt) {
         this.context = applicationContext;
@@ -33,6 +34,8 @@ public class AsyncTask extends android.os.AsyncTask<String, Void, Void> {
         mBt.setText("正在提交");
     }
 
+
+
     @Override
     protected Void doInBackground(String... params) {   //这边会有三个参数，第一个是bug的内容，第二个是姓名，第三个是学号
         MyLog.i(params[0] + "内容");
@@ -41,10 +44,9 @@ public class AsyncTask extends android.os.AsyncTask<String, Void, Void> {
         MyLog.i(params[3] + "学号");
 
         try {
-            //进行意见建议的上传
+            //进行意见建议的上传，获取数据库连接
             Connection con = DBUtil.getConnection();
-            String upload = "insert into bug(content,contact,submitter,bug_no) values(?,?,?,?)";
-            PreparedStatement prepareStatement = con.prepareStatement(upload);
+            PreparedStatement prepareStatement = con.prepareStatement(URL);
             prepareStatement.setString(1, params[0]);
             prepareStatement.setString(2, params[1]);
             prepareStatement.setString(3, params[2]);

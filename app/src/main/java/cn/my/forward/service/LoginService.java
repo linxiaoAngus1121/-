@@ -26,6 +26,11 @@ import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 
 public class LoginService extends IntentService {
 
+    public static final String INSERTUSERURL = "insert into stu(xuehao,password,name)  values(?," +
+            "?,?)";
+    public static final String INSERTBUGURL = "insert into login(login_stu_no,login_name," +
+            "login_data,login_dowhat)" +
+            "  values(?,?,?,?)";
 
     public LoginService() {
         super("name");
@@ -75,9 +80,8 @@ public class LoginService extends IntentService {
                         }
                     }
                 } else {
-                    String sql1 = "insert into stu(xuehao,password,name)  values(?,?,?)";
                     //这个是插入新用户的
-                    PreparedStatement prepareStatement = con.prepareStatement(sql1);
+                    PreparedStatement prepareStatement = con.prepareStatement(INSERTUSERURL);
                     prepareStatement.setString(1, login.getStuNo());
                     prepareStatement.setString(2, password);
                     prepareStatement.setString(3, login.getName());
@@ -88,9 +92,8 @@ public class LoginService extends IntentService {
                         MyLog.i("插入失败了");
                     }
                 }
-                String sql2 = "insert into login(login_stu_no,login_name,login_data,login_dowhat)" +
-                        "  values(?,?,?,?)";                               //插入每个用户登陆系统的时间，干了什么
-                PreparedStatement prepareStatement = con.prepareStatement(sql2);
+                //插入每个用户登陆系统的时间，干了什么
+                PreparedStatement prepareStatement = con.prepareStatement(INSERTBUGURL);
                 prepareStatement.setString(1, login.getStuNo());
                 prepareStatement.setString(2, login.getName());
                 Date date = new Date();

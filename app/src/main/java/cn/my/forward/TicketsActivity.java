@@ -26,11 +26,13 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_ticket;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.view.ITicketsView;
 
+/**
+ * 火车票查询
+ */
 public class TicketsActivity extends AppCompatActivity implements ITicketsView, View
         .OnClickListener {
     private EditText mEdit_from;
     private EditText mEdit_to;
-    private TextView mTv_time;
     private TextView mTv_date;
     private RecyclerView mShow_data;
     private SourcePresenter presenter = new SourcePresenter(this);
@@ -40,14 +42,13 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tickets);
-        bindViews();
+        initViews();
     }
 
 
-    private void bindViews() {
+    private void initViews() {
         mEdit_from = (EditText) findViewById(R.id.edit_from);
         mEdit_to = (EditText) findViewById(R.id.edit_to);
-        mTv_time = (TextView) findViewById(R.id.train_time);
         mTv_date = (TextView) findViewById(R.id.train_pre_day);
         mShow_data = (RecyclerView) findViewById(R.id.show_data);
         mpb = (ProgressBar) findViewById(R.id.ticket_pb);
@@ -74,30 +75,22 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
         SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault());
         int i = can.get(Calendar.DAY_OF_WEEK);
         mTv_date.setText(df.format(day) + "  " + s[i - 1]);
-      /*  new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (isflag) {
-                    try {
-                        Thread.sleep(1);
-                        if (handler != null) {
-                            Message message = handler.obtainMessage(0x110);
-                            handler.sendMessage(message);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();*/
     }
 
 
+    /**
+     * 请求成功后将数据展示到页面
+     *
+     * @param bean_ticket 车票信息
+     * @param spareTicket 余票信息
+     */
     @Override
     public void showTicketData(Bean_ticket bean_ticket, Bean_SpareTicket spareTicket) {
         if (mpb != null) {
             mpb.setVisibility(View.GONE);
         }
+        //适配器
+
         MyAdapterForTicket adapter = new MyAdapterForTicket(spareTicket, bean_ticket,
                 TicketsActivity
                         .this);
@@ -105,6 +98,7 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
 
     }
 
+    //请求失败后
     @Override
     public void showTicketError() {
         if (mpb != null) {

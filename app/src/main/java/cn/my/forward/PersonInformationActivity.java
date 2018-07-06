@@ -8,11 +8,14 @@ import android.widget.TextView;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
-import cn.my.forward.mvp.sourcequery.mvp.utils.CharUtils;
+import cn.my.forward.mvp.sourcequery.mvp.utils.CharUtil;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IPersonView;
 import lecho.lib.hellocharts.view.ColumnChartView;
 
+/**
+ * 个人信息查询
+ */
 public class PersonInformationActivity extends AppCompatActivity implements IPersonView {
 
     private SourcePresenter presenter = new SourcePresenter(this);
@@ -35,10 +38,12 @@ public class PersonInformationActivity extends AppCompatActivity implements IPer
         mtv2 = (TextView) findViewById(R.id.number);
         mtv3 = (TextView) findViewById(R.id.fdjh);
         mtv5 = (TextView) findViewById(R.id.orientation);
+        //这里开始请求
         presenter.person();
     }
 
 
+    //数据获取成功
     @Override
     public void showData(BeanPerson person) {
         MyLog.i(person.toString());
@@ -54,7 +59,8 @@ public class PersonInformationActivity extends AppCompatActivity implements IPer
      * @param person 实体信息
      */
     private void generateData(BeanPerson person) {
-        CharUtils.getData(getApplicationContext(), person, mColumnChartView);
+        //在这里生成图表
+        CharUtil.getData(person, mColumnChartView);
         mtv1.setText(person.getName());
         mtv2.setText(person.getId());
         mtv3.setText(person.getMajor());

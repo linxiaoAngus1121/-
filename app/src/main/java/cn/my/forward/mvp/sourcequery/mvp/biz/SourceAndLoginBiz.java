@@ -71,7 +71,6 @@ public class SourceAndLoginBiz implements ILogin {
     private boolean flag = false;    //判断是否是个人信息查询的标志位
     private String submitState;
     private Gson gson;
-    private boolean isfirst = true;    //默认是false,获取开始查询的viewstate的标志位
 
     private SourceAndLoginBiz() {
 
@@ -103,17 +102,20 @@ public class SourceAndLoginBiz implements ILogin {
         getVIEWSTATE(listener);
     }
 
+    //成绩查询
     @Override
     public void score(String year, IOnQuerySourceListener querySourceListener) {
         toGradeQurry(year, bean, querySourceListener, null);
     }
 
+    //课表查询
     @Override
     public void timeTable(int start, ITimeTableListener listener) {
         toTimeQuery(start, bean, stuName, listener);
     }
 
 
+    //考试查询
     @Override
     public void examQuery(String postion, IExamListener listener) {
         StringBuilder builder = new StringBuilder(postion);
@@ -124,6 +126,7 @@ public class SourceAndLoginBiz implements ILogin {
         toExam(listener, s);
     }
 
+    //等级考试查询
     @Override
     public void levelQuery(final ILevelListener listener) {
         final String url = "http://jwxt.sontan.net/xsdjkscx.aspx?xh=" + bean.getStuNo() + "&xm=" +
@@ -139,7 +142,7 @@ public class SourceAndLoginBiz implements ILogin {
         map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
         map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
                 "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
-
+        //网络请求
         instance.GetRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -150,24 +153,43 @@ public class SourceAndLoginBiz implements ILogin {
             public void onResponse(Call call, Response response) throws IOException {
                 //   listener.showResultSucceed();
                 if (response.body().byteStream() == null) {
-                    listener.showResultError("嗷了个嗷~~跑偏了");
+                    if(listener!=null){
+                        listener.showResultError("嗷了个嗷~~跑偏了");
+                    }
                     return;
                 }
+                //数据解析
                 getLevelData(response.body().byteStream(), url, listener);
             }
         });
     }
 
+    //个人信息
     @Override
     public void personInfomation(IPersonListener listener) {
         GetPersonData(listener);
     }
 
+    //颜值评分
     @Override
     public void lepai(String path, ILePaiListener lePaiListener) {
         getLepai(path, lePaiListener);
     }
 
+
+    //火车票
+    @Override
+    public void tickets(String from, String to, ITickedListener listener) {
+        getTicket(from, to, listener);
+    }
+
+
+    /**
+     * 颜值评分
+     *
+     * @param path          图片路径
+     * @param lePaiListener 回调监听
+     */
     private void getLepai(String path, final ILePaiListener lePaiListener) {
         if (lePaiListener == null) {
             return;
@@ -189,6 +211,7 @@ public class SourceAndLoginBiz implements ILogin {
         } else {
             MyLog.i("大小没有超过2M");
         }
+        //网络请求
         instance.testPost(url, file, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -202,6 +225,7 @@ public class SourceAndLoginBiz implements ILogin {
                 String string = response.body().string();
                 Gson gson = new Gson();
                 MyLog.i(string);
+                //json转成javabean
                 JsonRootBean rootBean = gson.fromJson(string, JsonRootBean
                         .class);
                 if (null == rootBean.getFaces()) {
@@ -212,9 +236,14 @@ public class SourceAndLoginBiz implements ILogin {
                     MyLog.i("face数组有东西");
                     Beauty beauty = rootBean.getFaces().get(0).getAttributes().getBeauty();
                     MyLog.i(beauty.toString());
+
+                    //获取分数
                     double male_score = beauty.getMale_score();
                     double female_score = beauty.getFemale_score();
+
+                    //格式化输出小数点后两位
                     DecimalFormat df = new DecimalFormat("######0.00");
+
                     lePaiListener.getDataSuccess(df.format((male_score + female_score) / 2));
                 } else {                        //没有人脸的情况下
                     MyLog.i("face数组没有东西");
@@ -237,10 +266,6 @@ public class SourceAndLoginBiz implements ILogin {
 
     }
 
-    @Override
-    public void tickets(String from, String to, ITickedListener listener) {
-        getTicket(from, to, listener);
-    }
 
     /**
      * 获取火车票信息
@@ -322,8 +347,7 @@ public class SourceAndLoginBiz implements ILogin {
         calendar.add(Calendar.DATE, 1);//把日期往前减少一天，若想把日期向后推一天则将负数改为正数
         date = calendar.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String dateString = formatter.format(date);
-        return dateString;
+        return formatter.format(date);
     }
 
     private void getrequestagain(final Bean_ticket bean_ticket, String url2, final ITickedListener
@@ -563,7 +587,6 @@ public class SourceAndLoginBiz implements ILogin {
         if (inputStream == null || url == null) {
             return;
         }
-
         try {
             Document document = Jsoup.parse(inputStream, "gb2312", url);
             Elements table = document.select("table tr:not(.datelisthead)");
@@ -576,7 +599,10 @@ public class SourceAndLoginBiz implements ILogin {
                         ());
                 been.add(bean);
             }
-            listener.showResultSucceed(been);
+            if(listener!=null){
+
+                listener.showResultSucceed(been);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -608,7 +634,7 @@ public class SourceAndLoginBiz implements ILogin {
         map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
                 "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
 
-
+        //网络请求
         instance.PostExamRequest(url, viewState, s, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -646,19 +672,19 @@ public class SourceAndLoginBiz implements ILogin {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (document != null && isfirst) {
+        if (document != null) {
             Elements elements = document.select("input");   //第一次进入是为了获取viewstate，同时判断是否需要查询数据
             //获取出第三个input标签
             Element element = elements.get(2);
             viewState = element.attr("value");
             MyLog.i("我走了getviewstate");
-            isfirst = false;
         }
         try {
             inputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //解析数据
         getdata(document, listener);
     }
 
@@ -670,12 +696,15 @@ public class SourceAndLoginBiz implements ILogin {
      */
     private void getdata(Document document, IExamListener listener) {
         if (document != null) {
-            //这里需要再一次判断，第一次有没有数据，没有签的话没有只有一个<tr>标签，直接return 回去
+            //这里需要再一次判断，第一次有没有数据，没有的话没有只有一个<tr>标签，直接return 回去
             MyLog.i("doucement不为空" + document.html());
             if (hasData(document)) {
                 //进行数据解析
                 MyLog.i("hasdata为true");
+
+                //解析
                 pastExamData(document, listener);
+
             } else {
                 if (listener != null) {
                     listener.showExamError("这学期还没有数据哟");
@@ -715,6 +744,7 @@ public class SourceAndLoginBiz implements ILogin {
         MyLog.i("我走了castExamdata");
         while (i < size) {
             Elements select = elements.get(i).select("td");
+            //座位号
             String s = "".equals(select.get(6).text()) ? "" : " " + select.get(6).text() + "号";
             ExamBean bean = new ExamBean(select.get(1).text(), select.get(3).text(), select.get
                     (4).text() + s);
@@ -722,6 +752,7 @@ public class SourceAndLoginBiz implements ILogin {
             i++;
         }
         if (listener != null) {
+            //回调接口
             listener.showExamSuccess(list);
         }
 
@@ -839,6 +870,7 @@ public class SourceAndLoginBiz implements ILogin {
                 " like Gecko");
         map.put("Content-Length", "230");
         final String url = "http://jwxt.sontan.net/Default2.aspx";
+
         instance.PostRequest(url, bean, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -908,6 +940,7 @@ public class SourceAndLoginBiz implements ILogin {
         String url = "http://jwxt.sontan.net/xskbcx" +
                 ".aspx?xh=" + bean.getStuNo() + "&xm=" + stuName + "&gnmkdm=N121603";
         MyLog.i(url);
+        //网络请求
         instance.GetRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -928,9 +961,10 @@ public class SourceAndLoginBiz implements ILogin {
                 String streamtoString = streamtoString(response.body().byteStream());
                 if (streamtoString != null) {
                     List<TimeTableBean> list = JsoupMethod(streamtoString);
+                    //课表的分页操作
                     ArrayList xuanke = CoursePages.xuanke(list);
                     ArrayList tempal2 = (ArrayList) xuanke.get(start);
-                    if (listener != null) {
+                    if (listener != null) {     //将数据回调给页面
                         listener.QueryTimeTableSuccess(tempal2);
                     }
                 } else {
@@ -940,11 +974,12 @@ public class SourceAndLoginBiz implements ILogin {
                 }
             }
         });
+        CoursePages.clear();    //这里要清除课表信息，不然会导致重新登录还是上个人的课表问题
 
     }
 
     /**
-     * 调用jsoup库进行解析
+     * 调用jsoup库进行解析成list
      *
      * @param streamtoString jsoup解析的字符串
      * @return 返回最终需要的数据
@@ -1276,10 +1311,11 @@ public class SourceAndLoginBiz implements ILogin {
         map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
         final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" +
                 bean.getStuNo() + "&xm=学生&gnmkdm=N121605";
+        //进行网络请求
         instance.GetRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                i("000", e.toString() + "成绩失败了");
+                MyLog.i(e.toString() + "成绩失败了");
                 if (querySourceListener != null) {
                     querySourceListener.OnError();
                 }
@@ -1318,10 +1354,11 @@ public class SourceAndLoginBiz implements ILogin {
                         }
                     }
 
-
+                    //区分个人信息查询和成绩查询（个人信息查询会调用成绩查询的方法）
                     if (flag) {
                         flag = false;
                         if (listener != null) {
+                            //个人信息的查询
                             pastScouce(bean, viewStateForPerson, listener);
                         }
                         return;
@@ -1348,6 +1385,12 @@ public class SourceAndLoginBiz implements ILogin {
         });
     }
 
+    /**
+     * 个人信息模块的数据解析
+     * @param bean 实体类
+     * @param substring1  viewstate
+     * @param personListener 回调监听
+     */
     private void pastScouce(Bean_l bean, final String substring1, final IPersonListener
             personListener) {
         String utf8Togb2312 = utf8Togb2312(stuName);
@@ -1364,6 +1407,7 @@ public class SourceAndLoginBiz implements ILogin {
         map.put("Content-Type", "application/x-www-form-urlencoded");
         map.put("Accept", "text/html, application/xhtml+xml, image/jxr, */*");
         map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        //进行网络请求
         instance.PostRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -1382,6 +1426,7 @@ public class SourceAndLoginBiz implements ILogin {
                         BeanPerson person = getPerson(document);
                         if (personListener != null) {
                             if (person != null) {
+                                //回调成功
                                 personListener.onPersonQuerySuccess(person);
                             }
                         }
@@ -1496,7 +1541,7 @@ public class SourceAndLoginBiz implements ILogin {
             substring, final IOnQuerySourceListener querySourceListener) {
         final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
                 "&xm=" + stuName + "&gnmkdm=N121605";
-        i("000", url);
+       // i("000", url);
         String utf8Togb2312 = utf8Togb2312(stuName);
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", bean.getCookies());
@@ -1523,9 +1568,8 @@ public class SourceAndLoginBiz implements ILogin {
                     IOException {
                 if (response.code() == 200) {
                     if (response.body().byteStream() != null) {
-                        //fialcast()                                    老方法
                         cast(response.body().byteStream(), url);      //改进方法
-                        if (querySourceListener != null) {
+                        if (querySourceListener != null) {              //回调接口
                             querySourceListener.OnQuerySuccess(list);
                         }
                     }

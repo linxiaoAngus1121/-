@@ -27,7 +27,7 @@ import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 
 /**
  * Created by 123456 on 2018/5/19.
- * 火车票查询功能
+ * 火车票查询功能显示
  */
 
 public class MyAdapterForTicket extends RecyclerView.Adapter<MyAdapterForTicket.MyHolder> {
@@ -90,12 +90,14 @@ public class MyAdapterForTicket extends RecyclerView.Adapter<MyAdapterForTicket.
                 }
             }
         });
+
         holder.mFrom.setText(result.getStation());
         holder.mTo.setText(result.getEndstation());
         holder.mDuration.setText(result.getCosttime());
         holder.mStart_time.setText(result.getDeparturetime());
         holder.mEnd_time.setText(result.getArrivaltime());
         holder.mTrain_no.setText(result.getTrainno());
+
         if (java.util.Objects.equals(result.getPriceed(), "0.0") || java.util.Objects.equals
                 (result.getPriceed(), "0") || null == result.getPriceed()) {
             holder.mSeat_price.setText(PLACEHOLDER);

@@ -27,7 +27,7 @@ import lecho.lib.hellocharts.view.ColumnChartView;
  * 图表工具类
  */
 
-public class CharUtils {
+public class CharUtil {
 
     private final static String[] tip = new String[]{"所选学分", "获得学分", "重修学分",
             "未过学分", "平均绩点", "专业人数"};
@@ -38,7 +38,7 @@ public class CharUtils {
      * @param person           数据类
      * @param mColumnChartView 图表
      */
-    public static void getData(Context context, BeanPerson person, ColumnChartView
+    public static void getData( BeanPerson person, ColumnChartView
             mColumnChartView) {
         mColumnChartView.setZoomEnabled(false);  //设置可以缩放
         int numSubcolums = 1;   //一个集合显示多少条柱子

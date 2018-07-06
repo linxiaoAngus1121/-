@@ -19,7 +19,7 @@ import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 
 /**
  * Created by 123456 on 2018/5/17.
- * 问卷调查的适配器
+ * 问卷调查的适配器（未实现）
  */
 
 public class MyRecyleViewAdapterForQuesion extends RecyclerView

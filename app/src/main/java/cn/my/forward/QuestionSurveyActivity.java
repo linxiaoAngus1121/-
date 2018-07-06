@@ -17,6 +17,9 @@ import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IQuestionView;
 
+/**
+ * 问卷调查（未实现）
+ */
 public class QuestionSurveyActivity extends AppCompatActivity implements IQuestionView {
 
     private SourcePresenter presenter = new SourcePresenter(this);

@@ -3,7 +3,6 @@ package cn.my.forward;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,67 +12,51 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-import cn.my.forward.customview.MyTextView;
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyBaseAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.ITimeTableView;
 
+/**
+ * 课表查询
+ */
 public class TimeTableActivity extends AppCompatActivity implements ITimeTableView, View
         .OnClickListener {
 
     private SourcePresenter presenter = new SourcePresenter(this);
     private GridView mGridView;
-    private LinearLayout layout;
     private TextView mTv;
     private View view = null;
     private AlertDialog dialog;
-    private String[] s = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
+    private static final String[] s = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+            "12", "13",
             "14", "15", "16", "17", "18", "19", "20"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timetable);
+        initview();
+    }
+
+    private void initview() {
         mTv = (TextView) findViewById(R.id.picker);
         mTv.setOnClickListener(this);
         mGridView = (GridView) findViewById(R.id.courceDetail);
-        layout = (LinearLayout) findViewById(R.id.contain);
-        createTextView();
+        LinearLayout layout = (LinearLayout) findViewById(R.id.contain);
+        presenter.createTextView(this, layout);
+        //课表查询第一周
         presenter.timetable(1);
     }
 
-    /**
-     * 动态生成头部周几的代码，自定义一个view
-     */
-    private void createTextView() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams
-                .MATCH_PARENT, 1.0f);
-        Date date = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int i1 = calendar.get(Calendar.DAY_OF_WEEK);    //获取当前是周几
-        for (int i = 1; i <= 6; i++) {
-            MyTextView mTv = new MyTextView(this);
-            if (i == i1 - 1) {
-                mTv.isToday = true;         //自定义view中的属性
-            }
-            mTv.setLayoutParams(lp);
-            mTv.setGravity(Gravity.CENTER);
-            mTv.setText(String.valueOf(i));
-            mTv.setTextSize(18);
-            layout.addView(mTv);
-        }
-    }
 
-
+    //课表查询成功
     @Override
     public void showTimeTble(List nodes) {
         Toast.makeText(this, "查询成功", Toast.LENGTH_SHORT).show();
+        //适配器
         MyBaseAdapter baseAdapter = new MyBaseAdapter(this, nodes);
         mGridView.setAdapter(baseAdapter);
     }

@@ -80,4 +80,9 @@ public class CoursePages {
 
         return al1;
     }
+
+
+    public static void clear(){
+        al1.clear();
+    }
 }

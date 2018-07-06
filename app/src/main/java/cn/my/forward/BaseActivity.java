@@ -15,7 +15,7 @@ import java.util.List;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 
 /*
-* 在这里进行一些全局的初始化，比如判断网络
+* 在这里进行一些全局的初始化，比如判断网络，权限申请等
 * */
 public class BaseActivity extends AppCompatActivity {
 
