@@ -12,9 +12,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.my.forward.mvp.sourcequery.mvp.User;
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyRecycleViewAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
+import cn.my.forward.mvp.sourcequery.mvp.utils.DynamicallyGenerateTitleUtil;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.IExamView;
 
@@ -33,8 +35,8 @@ public class ExamActivity extends AppCompatActivity implements IExamView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exam);
         Spinner mSpinner = (Spinner) findViewById(R.id.spinner);
-        String stuNo = getIntent().getStringExtra("stu_no");
-        mSpinner.setAdapter(presenter.initDataForAdapter(this, stuNo, false));
+        String stuNo = User.getInstance().getStuNo();
+        mSpinner.setAdapter(DynamicallyGenerateTitleUtil.initDataForAdapter(this,stuNo,false));
         mRv = (RecyclerView) findViewById(R.id.exam_show_recycleView);
         mRv.setLayoutManager(new LinearLayoutManager(this));
 

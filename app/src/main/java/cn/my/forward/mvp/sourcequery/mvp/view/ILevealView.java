@@ -1,6 +1,6 @@
 package cn.my.forward.mvp.sourcequery.mvp.view;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 
@@ -17,7 +17,7 @@ public interface ILevealView {
      *
      * @param been 返回的实体类对象
      */
-    void showLevelData(ArrayList<LevelBean> been);
+    void showLevelData(List<LevelBean> been);
 
     /**
      * 展示等级考试数据错误

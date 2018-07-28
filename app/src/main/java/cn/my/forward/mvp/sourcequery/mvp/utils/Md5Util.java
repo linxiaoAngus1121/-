@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
  * Md5加密
  */
 
-public class Md5Utils {
+public class Md5Util {
     public static String md5Password(String password) {
         if (password == null) {
             return null;

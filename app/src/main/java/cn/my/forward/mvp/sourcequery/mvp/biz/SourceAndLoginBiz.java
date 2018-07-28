@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,6 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,17 +39,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import cn.my.forward.mvp.sourcequery.mvp.ListForSaveData;
+import cn.my.forward.mvp.sourcequery.mvp.User;
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_SpareTicket;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_ticket;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_ticketResult;
 import cn.my.forward.mvp.sourcequery.mvp.bean.ExamBean;
+import cn.my.forward.mvp.sourcequery.mvp.bean.JsonRoot;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.TimeTableBean;
 import cn.my.forward.mvp.sourcequery.mvp.bean.lepai.Beauty;
 import cn.my.forward.mvp.sourcequery.mvp.bean.lepai.JsonRootBean;
+import cn.my.forward.mvp.sourcequery.mvp.utils.CONSTANT;
 import cn.my.forward.mvp.sourcequery.mvp.utils.CoursePages;
+import cn.my.forward.mvp.sourcequery.mvp.utils.DBUtil;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.okhttp.MyOkhttp;
 import okhttp3.Call;
@@ -71,6 +81,8 @@ public class SourceAndLoginBiz implements ILogin {
     private boolean flag = false;    //判断是否是个人信息查询的标志位
     private String submitState;
     private Gson gson;
+    private static boolean[] b = null;  //成绩查询中保存是否有成绩的标志位
+    private JsonRoot roots;
 
     private SourceAndLoginBiz() {
 
@@ -104,8 +116,8 @@ public class SourceAndLoginBiz implements ILogin {
 
     //成绩查询
     @Override
-    public void score(String year, IOnQuerySourceListener querySourceListener) {
-        toGradeQurry(year, bean, querySourceListener, null);
+    public void score(String year, int postion, IOnQuerySourceListener querySourceListener) {
+        toGradeQurry(year, postion, bean, querySourceListener, null);
     }
 
     //课表查询
@@ -129,19 +141,31 @@ public class SourceAndLoginBiz implements ILogin {
     //等级考试查询
     @Override
     public void levelQuery(final ILevelListener listener) {
-        final String url = "http://jwxt.sontan.net/xsdjkscx.aspx?xh=" + bean.getStuNo() + "&xm=" +
+
+        /*处理这里的逻辑
+         *1.先检查本地缓存是否存在（先省略）
+         *  2.去自己的数据库查询
+        *       3.去教务系统查
+        * */
+        List<LevelBean> been = MyDataBaseHasData();
+        if (null != been) {
+            listener.showResultSucceed(been);
+            MyLog.i("我是数据库的");
+            ListForSaveData.getInstance().setLeList(been);
+            return;
+        }
+        MyLog.i("走教务系统了");
+        final String url = CONSTANT.STBASE + "xsdjkscx.aspx?xh=" + bean.getStuNo() + "&xm=" +
                 stuName + "&gnmkdm=N121606";
         MyLog.i(url);
         //这里考虑使用SparseArray，但是SparseArray的key不可为string,所以用不了
         Map<String, String> map = new HashMap<>();
-        map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;" +
-                "q=0.8");
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
-        map.put("Connection", "keep-alive");
-        map.put("Cookie", bean.getCookies());
-        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
-                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        map.put(CONSTANT.ACCEPT, CONSTANT.ACCEPTINFOONE);
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.REFERER, CONSTANT.STBASE + "xs_main.aspx?xh=" + bean.getStuNo());
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
         //网络请求
         instance.GetRequest(url, map, new Callback() {
             @Override
@@ -153,7 +177,7 @@ public class SourceAndLoginBiz implements ILogin {
             public void onResponse(Call call, Response response) throws IOException {
                 //   listener.showResultSucceed();
                 if (response.body().byteStream() == null) {
-                    if(listener!=null){
+                    if (listener != null) {
                         listener.showResultError("嗷了个嗷~~跑偏了");
                     }
                     return;
@@ -162,6 +186,120 @@ public class SourceAndLoginBiz implements ILogin {
                 getLevelData(response.body().byteStream(), url, listener);
             }
         });
+    }
+
+
+    /**
+     * 判断自己的数据库是否存在需要的数据
+     *
+     * @return 需要的数据
+     */
+    private ArrayList<LevelBean> MyDataBaseHasData() {
+        Connection con = null;
+        ResultSet rs = null;
+        try {
+            con = DBUtil.getConnection();
+            PreparedStatement statement = con.prepareStatement(CONSTANT.SLEVELSQL);
+            statement.setInt(1, Integer.valueOf(User.getInstance().getStuNo()));
+            rs = statement.executeQuery();
+            if (rs.next()) {
+                String data = rs.getString("level_data");
+                MyLog.i(data + "数据库发回来的");
+                Gson gson = new Gson();
+                return gson.fromJson(data, new TypeToken<ArrayList<LevelBean>>() {
+                }.getType());
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            assert rs != null;
+            assert con != null;
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /**
+     * 判断自己的数据库是否存在需要的数据
+     *
+     * @return 需要的数据
+     */
+    private BeanPerson MyDataBaseHasData2() {
+        Connection con = null;
+        ResultSet rs = null;
+        try {
+            con = DBUtil.getConnection();
+            PreparedStatement statement = con.prepareStatement(CONSTANT.SLINFORMATIONSQL);
+            statement.setInt(1, Integer.valueOf(User.getInstance().getStuNo()));
+            rs = statement.executeQuery();
+            if (rs.next()) {
+                String data = rs.getString("information_data");
+                MyLog.i(data + "数据库发回来的");
+                Gson gson = new Gson();
+                return gson.fromJson(data, BeanPerson.class);
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            assert rs != null;
+            assert con != null;
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /**
+     * 判断自己的数据库是否存在需要的数据
+     *
+     * @return 需要的数据
+     */
+    private JsonRoot MyDataBaseHasData3() {
+        Connection con = null;
+        ResultSet rs = null;
+        try {
+            con = DBUtil.getConnection();
+            PreparedStatement statement = con.prepareStatement(CONSTANT.SELECTSOURCE);
+            statement.setInt(1, Integer.valueOf(User.getInstance().getStuNo()));
+            rs = statement.executeQuery();
+            if (rs.next()) {
+                String data = rs.getString("realsource");
+                MyLog.i(data + "数据库发回来的");
+                Gson gson = new Gson();
+                return gson.fromJson(data, JsonRoot.class);
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            assert rs != null;
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     //个人信息
@@ -195,7 +333,6 @@ public class SourceAndLoginBiz implements ILogin {
             return;
         }
         final File file = new File(path);
-        String url = "https://api-cn.faceplusplus.com/facepp/v3/detect";
         if (file.exists()) {
             MyLog.i("存在");
             MyLog.i(file.getPath());
@@ -212,7 +349,7 @@ public class SourceAndLoginBiz implements ILogin {
             MyLog.i("大小没有超过2M");
         }
         //网络请求
-        instance.testPost(url, file, new Callback() {
+        instance.testPost(CONSTANT.LEPAIURL, file, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 MyLog.i("失败");
@@ -275,25 +412,24 @@ public class SourceAndLoginBiz implements ILogin {
      * @param listener 回调
      */
     private void getTicket(String from, String to, final ITickedListener listener) {
-        final String url = "http://api.jisuapi" +
-                ".com/train/station2s?appkey=8a4cb09145dbc09b&start=" + from + "&end=" + to +
+        final String url = CONSTANT.TIBASE + "station2s?appkey=8a4cb09145dbc09b&start=" + from +
+                "&end=" + to +
                 "&ishigh=0";    //请求列车信息还有票价
         //日期是明天的
         String date = getDatePlus1();
-        final String url2 = "http://api.jisuapi.com/train/ticket?appkey=8a4cb09145dbc09b&start="
+        final String url2 = CONSTANT.TIBASE + "ticket?appkey=8a4cb09145dbc09b&start="
                 + from + "&end=" + to + "&date=" + date;  //请求列车剩票
         MyLog.i(url2);
-        instance.testGet(url, new Callback() {
+        instance.GetRequest(url, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (listener != null) {
                     listener.getDataError();
                 }
-
             }
 
             @Override
-            public void onResponse(Call call, @NonNull Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() != 200) {
                     if (listener != null) {
                         listener.getDataError();
@@ -352,7 +488,8 @@ public class SourceAndLoginBiz implements ILogin {
 
     private void getrequestagain(final Bean_ticket bean_ticket, String url2, final ITickedListener
             listener) {
-        instance.testGet(url2, new Callback() {
+
+        instance.GetRequest(url2, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (listener != null) {
@@ -361,7 +498,7 @@ public class SourceAndLoginBiz implements ILogin {
             }
 
             @Override
-            public void onResponse(Call call, @NonNull Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() != 200) {
                     if (listener != null) {
                         listener.getDataError();
@@ -390,17 +527,16 @@ public class SourceAndLoginBiz implements ILogin {
 
   /*  @Override
     public void questionQuery(final IQuestionListener listener) {
-        final String url = "http://jwxt.sontan.net/wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
+        final String url = CONSTANT.STBASE+"wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
                 stuName
                 + "&gnmkdm=N121304";
         MyLog.i(url + "问卷调查的url");
         Map<String, String> map = new HashMap<>();
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
-        map.put("Connection", "keep-alive");
-        map.put("Cookie", bean.getCookies());
-        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
-                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.REFERER, CONSTANT.STBASE+"xs_main.aspx?xh=" + bean.getStuNo());
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
         instance.GetRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -430,24 +566,23 @@ public class SourceAndLoginBiz implements ILogin {
             }
         }
         String[] strings = ChangeCode(list);
-        final String url = "http://jwxt.sontan.net/wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
+        final String url = CONSTANT.STBASE+"wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
                 utf8Togb2312
                         (nameexceptclass) + "&gnmkdm=N121304";
         MyLog.i(url);
         Map<String, String> map = new HashMap<>();
         map.put("Accept-Encoding", "gzip, deflate");
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
         map.put("Cache-Control", "max-age=0");
-        map.put("Connection", "keep-alive");
-        map.put("Cookie", bean.getCookies());
-        map.put("Referer", url);
-        map.put("Content-Length", "15011");
-        map.put("Content-Type", "application/x-www-form-urlencoded");
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.REFERER, url);
+        map.put(CONSTANT.CONTENT_LENGTH, "15011");
+        map.put(CONSTANT.CONTENTTYPE, CONSTANT.CONTENTTYPEINFO);
         map.put("Upgrade-Insecure-Requests", "1");
         map.put("Origin", "http://jwxt.sontan.net");
         map.put("Host", "jwxt.sontan.net");
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
-                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
         instance.PostQuestionRequest(url, submitState, map, strings, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -498,7 +633,7 @@ public class SourceAndLoginBiz implements ILogin {
     }
 
     private void requestForpage(String viewstate, final IQuestionListener listener) {
-        final String url = "http://jwxt.sontan.net/wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
+        final String url = CONSTANT.STBASE+"wjdc.aspx?xh=" + bean.getStuNo() + "&xm=" +
                 stuName
                 + "&gnmkdm=N121304";
         String name = utf8Togb2312(nameexceptclass);
@@ -509,15 +644,14 @@ public class SourceAndLoginBiz implements ILogin {
             }
         }
         Map<String, String> map = new HashMap<>();
-      map.put("Accept-Language","zh-CN,zh;q=0.8");
-        map.put("Connection","keep-alive");
-        map.put("Content-Type","application/x-www-form-urlencoded");
-        map.put("Cookie",bean.getCookies());
-        map.put("Referer","http://jwxt.sontan.net/wjdc.aspx?xh="+bean.getStuNo()+"&xm="+
+      map.put(CONSTANT.ACCEPTLANAGE,CONSTANT.ACCEPTLANAGEINFO);
+        map.put(CONSTANT.CONNECTION,CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.CONTENTTYPE,CONSTANT.CONTENTTYPEINFO);
+        map.put(CONSTANT.COOKIES,bean.getCookies());
+        map.put(CONSTANT.REFERER,CONSTANT.STBASE+"wjdc.aspx?xh="+bean.getStuNo()+"&xm="+
     name +
             "&gnmkdm=N121304");
-        map.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, "+
-                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        map.put(CONSTANT.USERAGENT,CONSTANT.USERAGENTINFO);
         instance.PostQuestionRequest(url,viewstate,map,null,new
 
     Callback() {
@@ -571,7 +705,7 @@ public class SourceAndLoginBiz implements ILogin {
 
     private void GetPersonData(IPersonListener listener) {
         flag = true;
-        this.toGradeQurry("", bean, null, listener);//这里就保证了取到viewStateForPerson
+        this.toGradeQurry("", 0, bean, null, listener);//这里就保证了取到viewStateForPerson
 
     }
 
@@ -599,9 +733,10 @@ public class SourceAndLoginBiz implements ILogin {
                         ());
                 been.add(bean);
             }
-            if(listener!=null){
-
+            ListForSaveData.getInstance().setLeList(been);
+            if (listener != null) {
                 listener.showResultSucceed(been);
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -621,18 +756,16 @@ public class SourceAndLoginBiz implements ILogin {
      * @param s        数组保存所有数据
      */
     private void toExam(final IExamListener listener, String[] s) {
-        final String url = "http://jwxt.sontan.net/xskscx" + ".aspx?xh=" + bean.getStuNo() +
+        final String url = CONSTANT.STBASE + "xskscx" + ".aspx?xh=" + bean.getStuNo() +
                 "&xm=" +
                 stuName + "&gnmkdm=N121604";
         Map<String, String> map = new HashMap<>();
-        map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;" +
-                "q=0.8");
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
-        map.put("Connection", "keep-alive");
-        map.put("Cookie", bean.getCookies());
-        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, " +
-                "like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.3964.2 Safari/537.36");
+        map.put(CONSTANT.ACCEPT, CONSTANT.ACCEPTINFOONE);
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.REFERER, CONSTANT.STBASE + "xs_main.aspx?xh=" + bean.getStuNo());
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
 
         //网络请求
         instance.PostExamRequest(url, viewState, s, map, new Callback() {
@@ -776,7 +909,7 @@ public class SourceAndLoginBiz implements ILogin {
      */
     private void getVIEWSTATE(final IGetCodeListtener listener) {
         final Bean_l bean = new Bean_l();
-        instance.GetRequest("http://jwxt.sontan.net/", new Callback() {
+        instance.GetRequest(CONSTANT.STBASE, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 MyLog.i(e.toString());
@@ -829,9 +962,9 @@ public class SourceAndLoginBiz implements ILogin {
      */
     private void getpic(final Bean_l bean, final IGetCodeListtener listener) {
         Map<String, String> map = new HashMap<>();
-        map.put("Cookie", bean.getCookies());
-        map.put("Connection", " Keep-Alive");
-        instance.GetRequest("http://jwxt.sontan.net/CheckCode.aspx", map, new Callback() {
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        instance.GetRequest(CONSTANT.STBASE + "CheckCode.aspx", map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 i("000", e.toString() + "获取验证码失败了");
@@ -862,14 +995,13 @@ public class SourceAndLoginBiz implements ILogin {
         this.bean = bean;
         Map<String, String> map = new HashMap<>();
         // TODO: 2018/2/7  因为这个是要和服务器下发的cookies保持一致才能进行登录，之前的就是这里出错，所以不能登录.
-        map.put("Cookie", bean.getCookies());
-        map.put("Connection", " Keep-Alive");
-        map.put("Content-Type", "application/x-www-form-urlencoded");
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
-                " like Gecko");
-        map.put("Content-Length", "230");
-        final String url = "http://jwxt.sontan.net/Default2.aspx";
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.CONTENTTYPE, CONSTANT.CONTENTTYPEINFO);
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
+        map.put(CONSTANT.CONTENT_LENGTH, "230");
+        final String url = CONSTANT.STBASE + "Default2.aspx";
 
         instance.PostRequest(url, bean, map, new Callback() {
             @Override
@@ -931,13 +1063,12 @@ public class SourceAndLoginBiz implements ILogin {
             listener) {
 
         Map<String, String> map = new HashMap<>();
-        map.put("Cookie", bean.getCookies());
-        map.put("Connection", " Keep-Alive");
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
-                " like Gecko");
-        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
-        String url = "http://jwxt.sontan.net/xskbcx" +
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
+        map.put(CONSTANT.REFERER, CONSTANT.STBASE + "xs_main.aspx?xh=" + bean.getStuNo());
+        String url = CONSTANT.STBASE + "xskbcx" +
                 ".aspx?xh=" + bean.getStuNo() + "&xm=" + stuName + "&gnmkdm=N121603";
         MyLog.i(url);
         //网络请求
@@ -1300,16 +1431,64 @@ public class SourceAndLoginBiz implements ILogin {
      * @param listener            个人信息回调
      */
 
-    private void toGradeQurry(final String year, @Nullable final Bean_l bean, final
-    IOnQuerySourceListener
-            querySourceListener, final IPersonListener listener) {
+    private void toGradeQurry(final String year, final int postion, @Nullable final Bean_l bean,
+                              final
+                              IOnQuerySourceListener
+                                      querySourceListener, final IPersonListener listener) {
+
+          /*处理这里的逻辑
+         *1.先检查本地缓存是否存在（先省略）
+         *  2.去自己的数据库查询
+        *       3.去教务系统查
+        * */
+        if (!flag) {    //这样才不会影响个人信息查询那一模块
+
+            if (null == roots) {    //这样可以避免每次都去请求自己的数据库，节省用户流量
+                roots = MyDataBaseHasData3();
+            }
+            if (null != roots) {
+                MyLog.i(roots.getMSize() + "");
+                if (null == b) {
+                    b = new boolean[7];
+                    for (int i = 0; i <= 6; i++) {  //加上一个历年成绩，一共七个
+                        if (i == 0) {
+                            if (roots.getMKeys().get(0) == 0) {
+                                MyLog.i("0位置有数据");
+                                b[i] = true;
+                                continue;
+                            }
+                        }
+                        if (roots.getMKeys().get(i) == 0) {
+                            b[i] = false;
+                            MyLog.i(i + "位置没有数据");
+                        } else {
+                            b[i] = true;
+                            MyLog.i(i + "位置有数据");
+                        }
+                    }
+                }
+                //不是空，代表不是第一次进来,看看当前位置是不是0，是0的话当前位置就是false,就要从教务系统去请求了
+                if (b[postion]) { //true代表有数据，可以从数据库取
+                    ArrayList<String> list = null;
+                    list = roots.getMValues().get(postion);
+                    if (null != list) {
+                        if (null != querySourceListener) {
+                            MyLog.i("从数据库发送出去的");
+                            querySourceListener.OnQuerySuccess(list);
+                            ListForSaveData.getInstance().setMap(postion, list);    //放入内容中
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+        MyLog.i("真正去教务系统了");
         Map<String, String> map = new HashMap<>();
-        map.put("Cookie", bean.getCookies());
-        map.put("Connection", " Keep-Alive");
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
-                " like Gecko");
-        map.put("Referer", "http://jwxt.sontan.net/xs_main.aspx?xh=" + bean.getStuNo());
-        final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" +
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.CONNECTION, " Keep-Alive");
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
+        map.put(CONSTANT.REFERER, CONSTANT.STBASE + "xs_main.aspx?xh=" + bean.getStuNo());
+        final String url = CONSTANT.STBASE + "xscjcx.aspx?xh=" +
                 bean.getStuNo() + "&xm=学生&gnmkdm=N121605";
         //进行网络请求
         instance.GetRequest(url, map, new Callback() {
@@ -1365,10 +1544,12 @@ public class SourceAndLoginBiz implements ILogin {
                     }
                     switch (year) {
                         case "":    //默认开始历年成绩查询
-                            pastScouce(bean, viewStateForPerson, "", "", querySourceListener);
+                            pastScouce(bean, viewStateForPerson, postion, "", "",
+                                    querySourceListener);
                             break;
                         case "历年成绩":   //选择的是历年成绩查询拿一项
-                            pastScouce(bean, viewStateForPerson, "", "", querySourceListener);
+                            pastScouce(bean, viewStateForPerson, postion, "", "",
+                                    querySourceListener);
                             break;
                         default:
                             StringBuilder builder = new StringBuilder(year);
@@ -1377,7 +1558,8 @@ public class SourceAndLoginBiz implements ILogin {
                             s[0] = builder.substring(0, index);//年
                             s[1] = builder.substring(index + 1);//学期
                             MyLog.i(s[0] + s[1] + "这是学期学年数据");
-                            pastScouce(bean, viewStateForPerson, s[0], s[1], querySourceListener);
+                            pastScouce(bean, viewStateForPerson, postion, s[0], s[1],
+                                    querySourceListener);
                             break;
                     }
                 }
@@ -1387,26 +1569,40 @@ public class SourceAndLoginBiz implements ILogin {
 
     /**
      * 个人信息模块的数据解析
-     * @param bean 实体类
-     * @param substring1  viewstate
+     *
+     * @param bean           实体类
+     * @param substring1     viewstate
      * @param personListener 回调监听
      */
     private void pastScouce(Bean_l bean, final String substring1, final IPersonListener
             personListener) {
+
+         /*处理这里的逻辑
+         *1.先检查本地缓存是否存在（先省略）
+         *  2.去自己的数据库查询
+        *       3.去教务系统查
+        * */
+        BeanPerson list = MyDataBaseHasData2();
+        if (null != list) {
+            MyLog.i("从自己的数据库取出来的");
+            personListener.onPersonQuerySuccess(list);
+            ListForSaveData.getInstance().setPerson(list);
+            return;
+        }
+        MyLog.i("走教务系统的information");
         String utf8Togb2312 = utf8Togb2312(stuName);
-        final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
+        final String url = CONSTANT.STBASE + "xscjcx.aspx?xh=" + bean.getStuNo() +
                 "&xm=" + stuName + "&gnmkdm=N121605";
         i("000", url);
         Map<String, String> map = new HashMap<>();
-        map.put("Cookie", bean.getCookies());
-        map.put("Connection", " Keep-Alive");
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
-                " like Gecko");
-        map.put("Referer", "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo()
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
+        map.put(CONSTANT.REFERER, CONSTANT.STBASE + "xscjcx.aspx?xh=" + bean.getStuNo()
                 + "&xm=" + utf8Togb2312 + "&gnmkdm=N121605");
-        map.put("Content-Type", "application/x-www-form-urlencoded");
-        map.put("Accept", "text/html, application/xhtml+xml, image/jxr, */*");
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        map.put(CONSTANT.CONTENTTYPE, CONSTANT.CONTENTTYPEINFO);
+        map.put(CONSTANT.ACCEPT, CONSTANT.ACCEPTINFOTWO);
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
         //进行网络请求
         instance.PostRequest(url, map, new Callback() {
             @Override
@@ -1427,7 +1623,9 @@ public class SourceAndLoginBiz implements ILogin {
                         if (personListener != null) {
                             if (person != null) {
                                 //回调成功
+                                MyLog.i("我还是会执行的");
                                 personListener.onPersonQuerySuccess(person);
+                                ListForSaveData.getInstance().setPerson(person);
                             }
                         }
                     } catch (IOException e) {
@@ -1448,6 +1646,12 @@ public class SourceAndLoginBiz implements ILogin {
         }, substring1, "", "", "空");
     }
 
+    /**
+     * 从document中取出对应的信息，并封装到实体类中
+     *
+     * @param document document对象
+     * @return 封装完的实体类
+     */
     private BeanPerson getPerson(Document document) {
         BeanPerson person = new BeanPerson();
         Element element = document.select("#lbl_xh").first();       //学号
@@ -1537,22 +1741,21 @@ public class SourceAndLoginBiz implements ILogin {
      * @param substring           学期
      * @param querySourceListener 回调
      */
-    private void pastScouce(Bean_l bean, final String substring1, final String s, final String
-            substring, final IOnQuerySourceListener querySourceListener) {
-        final String url = "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo() +
+    private void pastScouce(Bean_l bean, final String substring1, final int postion, final String s,
+                            final String
+                                    substring, final IOnQuerySourceListener querySourceListener) {
+        final String url = CONSTANT.STBASE + "xscjcx.aspx?xh=" + bean.getStuNo() +
                 "&xm=" + stuName + "&gnmkdm=N121605";
-       // i("000", url);
         String utf8Togb2312 = utf8Togb2312(stuName);
         Map<String, String> map = new HashMap<>();
-        map.put("Cookie", bean.getCookies());
-        map.put("Connection", " Keep-Alive");
-        map.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0)" +
-                " like Gecko");
-        map.put("Referer", "http://jwxt.sontan.net/xscjcx.aspx?xh=" + bean.getStuNo()
+        map.put(CONSTANT.COOKIES, bean.getCookies());
+        map.put(CONSTANT.CONNECTION, CONSTANT.CONNECTIONINFO);
+        map.put(CONSTANT.USERAGENT, CONSTANT.USERAGENTINFO);
+        map.put(CONSTANT.REFERER, CONSTANT.STBASE + "xscjcx.aspx?xh=" + bean.getStuNo()
                 + "&xm=" + utf8Togb2312 + "&gnmkdm=N121605");
-        map.put("Content-Type", "application/x-www-form-urlencoded");
-        map.put("Accept", "text/html, application/xhtml+xml, image/jxr, */*");
-        map.put("Accept-Language", "zh-CN,zh;q=0.8");
+        map.put(CONSTANT.CONTENTTYPE, CONSTANT.CONTENTTYPEINFO);
+        map.put(CONSTANT.ACCEPT, CONSTANT.ACCEPTINFOTWO);
+        map.put(CONSTANT.ACCEPTLANAGE, CONSTANT.ACCEPTLANAGEINFO);
         instance.PostRequest(url, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -1568,9 +1771,13 @@ public class SourceAndLoginBiz implements ILogin {
                     IOException {
                 if (response.code() == 200) {
                     if (response.body().byteStream() != null) {
-                        cast(response.body().byteStream(), url);      //改进方法
+                        cast(response.body().byteStream(), url);        //改进方法
                         if (querySourceListener != null) {              //回调接口
                             querySourceListener.OnQuerySuccess(list);
+                            MyLog.i("准备放数据进入" + postion);
+                            //这里不重新new这个list,放进去的数据是不正确的
+                            ArrayList<String> list01 = new ArrayList<String>(list);
+                            ListForSaveData.getInstance().setMap(postion, list01);
                         }
                     }
                 }
@@ -1642,8 +1849,6 @@ public class SourceAndLoginBiz implements ILogin {
             number = matcher.group(0);
             name = name.replaceAll("\\d+", "");
         }
-
-
         byte[] bytes = new byte[0];//先把字符串按gb2312转成byte数组
         try {
             bytes = name.getBytes("gb2312");

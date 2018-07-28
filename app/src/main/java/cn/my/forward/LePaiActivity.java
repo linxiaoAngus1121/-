@@ -321,8 +321,8 @@ public class LePaiActivity extends AppCompatActivity implements SurfaceHolder.Ca
     @Override
     public void showDialog() {
         if (dialog == null) {
-            dialog = ProgressDialog.show(LePaiActivity.this, "提示",
-                    "客官请稍等，正在努力上传", true,
+            dialog = ProgressDialog.show(LePaiActivity.this, getString(R.string.tip),
+                    getString(R.string.uploading), true,
                     false, null);
         } else {
             dialog.show();

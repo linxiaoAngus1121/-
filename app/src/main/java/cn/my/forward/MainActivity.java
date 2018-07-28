@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.StrictMode;
 import android.text.TextUtils;
 import android.view.View;
@@ -16,12 +15,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import cn.my.forward.customview.MyPsEditText;
-import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
+import cn.my.forward.mvp.sourcequery.mvp.User;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
 import cn.my.forward.mvp.sourcequery.mvp.utils.ShareUtil;
 import cn.my.forward.mvp.sourcequery.mvp.view.ILoginView;
@@ -38,9 +35,6 @@ public class MainActivity extends BaseActivity implements ILoginView, View
     private ImageView miv;
     private Button mButton;
     private SourcePresenter presenter = new SourcePresenter(this);
-    private static final String FILE_NAME = "MyPs";
-    private static final String FILE_PATH = Environment.getExternalStorageDirectory() + File
-            .separator + "tupian.png";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +47,6 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll()
                 .build();
         StrictMode.setThreadPolicy(policy);
-       /* SharedPreferences preferences = getSharedPreferences(FILE_NAME, MODE_PRIVATE);
-        String no = preferences.getString("no", "");
-        String ps = preferences.getString("ps", "");*/
-
         String no = ShareUtil.getString(this, "no", "");
         String ps = ShareUtil.getString(this, "ps", "");
         mEditnum = (EditText) findViewById(R.id.ed_num);
@@ -95,10 +85,6 @@ public class MainActivity extends BaseActivity implements ILoginView, View
         try {
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
             miv.setImageBitmap(bitmap);
-            FileOutputStream outputStream = new FileOutputStream(FILE_PATH);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,12 +122,12 @@ public class MainActivity extends BaseActivity implements ILoginView, View
 
     @Override
     public void showCodeError(String s) {
-        Toast.makeText(this, "获取验证码失败", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.failuregetcode, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void showViewStateError(String s) {
-        Toast.makeText(this, "获取viewstate失败", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.failuregetviewstate, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -150,11 +136,12 @@ public class MainActivity extends BaseActivity implements ILoginView, View
             remberPs(this.getstudNo(), this.getstuPs());
         }
         Intent intent = new Intent(MainActivity.this, ChoiseActivity.class);
-        Bean_l lo = new Bean_l();
+        /*Bean_l lo = new Bean_l();
         lo.setStuNo(this.getstudNo());
         lo.setName(name);
         lo.setStuPs(this.getstuPs());
-        intent.putExtra("information", lo);
+        intent.putExtra("information", lo);*/
+        User.getInstance().setInformation(this.getstudNo(), name, this.getstuPs());
         startActivity(intent);
         finish();
     }
@@ -166,18 +153,14 @@ public class MainActivity extends BaseActivity implements ILoginView, View
      * @param getstuPs 密码
      */
     private void remberPs(String s, String getstuPs) {
-      /*  SharedPreferences.Editor edit = getSharedPreferences(FILE_NAME, MODE_PRIVATE).edit();
-        edit.putString("no", s);
-        edit.putString("ps", getstuPs);
-        edit.apply();*/
         ShareUtil.putString(this, "no", s);
         ShareUtil.putString(this, "ps", getstuPs);
     }
 
     @Override
     public void showLoginError() {
-        Toast.makeText(this, "登录失败,请重试", Toast.LENGTH_SHORT).show();
-        mButton.setText("登陆");
+        Toast.makeText(this, R.string.loginFailure, Toast.LENGTH_SHORT).show();
+        mButton.setText(R.string.login);
         editText.setText("");
         mButton.setClickable(true);
         presenter.changeCode();
@@ -198,11 +181,11 @@ public class MainActivity extends BaseActivity implements ILoginView, View
             case R.id.finalto:  //登录按钮
                 if (TextUtils.isEmpty(this.getstudNo()) || TextUtils.isEmpty(this.getstuPs()) ||
                         TextUtils.isEmpty(this.getCode())) {
-                    Toast.makeText(this, "不可以偷懒不填哟", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.must_insert, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 presenter.login();
-                mButton.setText("正在登陆");
+                mButton.setText(R.string.loging);
                 mButton.setClickable(false);
                 break;
 

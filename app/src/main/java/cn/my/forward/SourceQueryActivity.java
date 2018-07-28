@@ -16,8 +16,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.my.forward.mvp.sourcequery.mvp.User;
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyScoureViewAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
+import cn.my.forward.mvp.sourcequery.mvp.utils.DynamicallyGenerateTitleUtil;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.ISourceView;
 
@@ -30,38 +32,29 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
     private SourcePresenter presenter = new SourcePresenter(this);
 
     private ProgressBar bar;
-    private boolean isFirst = true;
     private List<String> mlist;
     private MyScoureViewAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scorequery);
         mlist = new ArrayList<>();
         Spinner mSpinner = (Spinner) findViewById(R.id.scoure_query_sp);
         RecyclerView mLv = (RecyclerView) findViewById(R.id.scoure_data_lv);
         bar = (ProgressBar) findViewById(R.id.scpure_bar);
-        String stuNo = getIntent().getStringExtra("stu_no");
-        mSpinner.setAdapter(presenter.initDataForAdapter(this, stuNo, true));
-        presenter.scoureQuery("");//历年成绩查询
+        String stuNo = User.getInstance().getStuNo();
+        mSpinner.setAdapter(DynamicallyGenerateTitleUtil.initDataForAdapter(this, stuNo, true));
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                //第一次进入的时候，这里会重复请求，所以要设置一个标志位，防止第一次请求出现问题
-                if (isFirst && position == 0) {
-                    isFirst = false;
-                    return;
-                }
                 //进度条
                 if (bar != null) {
                     bar.setVisibility(View.VISIBLE);
                 }
+                //默认会选第一个，所以在这里自动发起请求
                 String parentItemAtPosition = (String) parent.getItemAtPosition(position);
-                presenter.scoureQuery(parentItemAtPosition);//学期成绩查询
-
+                presenter.scoureQuery(parentItemAtPosition, position);//学期成绩查询
             }
 
             @Override
@@ -82,19 +75,20 @@ public class SourceQueryActivity extends AppCompatActivity implements ISourceVie
 
     @Override
     public void showSource(ArrayList<String> list) {
+        MyLog.i("到这里了");
         bar.setVisibility(View.GONE);
         mlist.clear();
         mlist.addAll(list);
         adapter.notifyDataSetChanged(); //更新数据源，提示listview刷新
         if (list.size() == 0) {
-            Toast.makeText(this, "这学期还没有数据哟", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sourcenodata, Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void showSourceError() {
         bar.setVisibility(View.GONE);
-        Toast.makeText(this, "查询出错啦", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.query_error, Toast.LENGTH_SHORT).show();
     }
 
 

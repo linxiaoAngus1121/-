@@ -48,5 +48,25 @@
     <string name="erdengzuo">二等座</string>
     <string name="ok">确定</string>
     <string name="album">相册</string>
+    <string name="exit">再按一次退出教务系统</string>
+    <string name="advices">请输入您的意见建议哟</string>
+    <string name="tip">提示</string>
+    <string name="uploading">客官请稍等，正在努力上传</string>
+    <string name="query_success">查询成功</string>
+    <string name="query_error">查询出错啦</string>
+    <string name="loging">正在登陆</string>
+    <string name="must_insert">不可以偷懒不填哟</string>
+
+
+    <string name="loginFailure">登录失败,请重试</string>
+    <string name="failuregetcode">获取验证码失败</string>
+    <string name="failuregetviewstate">获取状态码失败</string>
+    <string name="sourcenodata">这学期还没有数据哟</string>
+    <string name="ticket_error">查询出错啦，换个地址试试</string>
+    <string name="ticket_address">两个地点都要填哟</string>
+    <string name="choiseweek">请选择周数</string>
+    <string name="submiting">正在提交</string>
+    <string name="submitsuccess">提交成功啦，感谢您提出的宝贵意见</string>
+    <string name="submit">提交反馈</string>
 
 </resources>

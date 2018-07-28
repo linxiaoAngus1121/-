@@ -16,6 +16,7 @@ import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyBaseAdapter;
 import cn.my.forward.mvp.sourcequery.mvp.presenter.SourcePresenter;
+import cn.my.forward.mvp.sourcequery.mvp.utils.DynamicallyGenerateTitleUtil;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.mvp.sourcequery.mvp.view.ITimeTableView;
 
@@ -46,7 +47,7 @@ public class TimeTableActivity extends AppCompatActivity implements ITimeTableVi
         mTv.setOnClickListener(this);
         mGridView = (GridView) findViewById(R.id.courceDetail);
         LinearLayout layout = (LinearLayout) findViewById(R.id.contain);
-        presenter.createTextView(this, layout);
+        DynamicallyGenerateTitleUtil.createTextView(this,layout);
         //课表查询第一周
         presenter.timetable(1);
     }
@@ -55,7 +56,7 @@ public class TimeTableActivity extends AppCompatActivity implements ITimeTableVi
     //课表查询成功
     @Override
     public void showTimeTble(List nodes) {
-        Toast.makeText(this, "查询成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.query_success, Toast.LENGTH_SHORT).show();
         //适配器
         MyBaseAdapter baseAdapter = new MyBaseAdapter(this, nodes);
         mGridView.setAdapter(baseAdapter);
@@ -63,7 +64,7 @@ public class TimeTableActivity extends AppCompatActivity implements ITimeTableVi
 
     @Override
     public void showTimeTbleError(String s) {
-        Toast.makeText(this, "惨了，查询失败", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.query_error, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -76,7 +77,7 @@ public class TimeTableActivity extends AppCompatActivity implements ITimeTableVi
         if (dialog == null) {
             MyLog.i("dialog是空");
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            dialog = builder.setTitle("请选择周数")
+            dialog = builder.setTitle(R.string.choiseweek)
                     .setView(view).create();
         }
         dialog.show();

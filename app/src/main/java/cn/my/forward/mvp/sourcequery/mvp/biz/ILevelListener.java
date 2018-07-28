@@ -1,6 +1,6 @@
 package cn.my.forward.mvp.sourcequery.mvp.biz;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
 
@@ -10,7 +10,7 @@ import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
  */
 
 public interface ILevelListener {
-    void showResultSucceed(ArrayList<LevelBean> been);
+    void showResultSucceed(List<LevelBean> been);
 
     void showResultError(String s);
 }

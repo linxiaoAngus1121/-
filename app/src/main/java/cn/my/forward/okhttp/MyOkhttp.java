@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Map;
 
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
+import cn.my.forward.mvp.sourcequery.mvp.utils.CONSTANT;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -35,16 +36,6 @@ public class MyOkhttp {
         return instance;
     }
 
-    /**
-     * 火车票信息查询
-     *
-     * @param url      地址
-     * @param callback 回调
-     */
-    public void testGet(String url, Callback callback) {
-        Request builder = new Request.Builder().get().url(url).build();
-        client.newCall(builder).enqueue(callback);
-    }
 
 
     /**
@@ -91,7 +82,7 @@ public class MyOkhttp {
      * Get请求
      *
      * @param url      请求地址
-     * @param map      请求参数
+     * @param map      请求头
      * @param callback 回调监听
      */
     public void GetRequest(String url, Map<String, String> map, Callback callback) {
@@ -100,7 +91,9 @@ public class MyOkhttp {
     }
 
 
-    public void PostQuestionRequest(String url, String viewstate, Map<String, String> map,
+ /*
+    //问卷调查
+  public void PostQuestionRequest(String url, String viewstate, Map<String, String> map,
                                     String[] string, Callback
                                             callback) {
         Request request = buildRequest(url, viewstate, map, string);
@@ -110,8 +103,8 @@ public class MyOkhttp {
 
     private Request buildRequest(String url, String s, Map<String, String> m, String[] mlist) {
         if (mlist == null) {    //这种是请求填写调查问卷的
-            FormBody body = new FormBody.Builder().add("__EVENTTARGET", "Datagrid4:_ctl2:link").add
-                    ("__EVENTARGUMENT", "").add("__VIEWSTATE", s).build();
+            FormBody body = new FormBody.Builder().add(CONSTANT.EVENTTARGET, "Datagrid4:_ctl2:link").add
+                    (CONSTANT.EVENTARGUMENT, "").add(CONSTANT.VIEWSTATE, s).build();
             Request.Builder post = new Request.Builder().url(url).post(body);
             for (Map.Entry<String, String> stringStringEntry : m.entrySet()) {
                 Map.Entry element = (Map.Entry) stringStringEntry;
@@ -121,8 +114,8 @@ public class MyOkhttp {
             }
             return post.build();
         } else {                    //这种是提交问卷调查的
-            FormBody.Builder body = new FormBody.Builder().add("__EVENTTARGET", "").add
-                    ("__EVENTARGUMENT", "").add("__VIEWSTATE", s);
+            FormBody.Builder body = new FormBody.Builder().add(CONSTANT.EVENTTARGET, "").add
+                    (CONSTANT.EVENTARGUMENT, "").add(CONSTANT.VIEWSTATE, s);
             for (int i = 2; i <= 23; i++) {
                 body.add("Datagrid1%3Actl" + i + "%3ARadioButtonList1", mlist[i]);
                 MyLog.i("Datagrid1%3A_ctl" + i + "%3ARadioButtonList1" + "     内容为   " + mlist[i]);
@@ -139,7 +132,7 @@ public class MyOkhttp {
             return post.build();
         }
     }
-
+*/
 
     /**
      * post请求
@@ -257,7 +250,7 @@ public class MyOkhttp {
      */
     private FormBody buildBody(Bean_l bean) {
         return new FormBody.Builder()
-                .add("__VIEWSTATE", bean.getViewState())
+                .add(CONSTANT.VIEWSTATE, bean.getViewState())
                 .add("txtUserName", bean.getStuNo())
                 .add("TextBox2", bean.getStuPs())
                 .add("txtSecretCode", bean.getCode())
@@ -281,37 +274,37 @@ public class MyOkhttp {
         if (sub[1].equals("") && sub[2].equals("") && sub[3].equals("空")) {  //个人信息查询
             MyLog.i("走了我想要的");
             return new FormBody.Builder()
-                    .add("__EVENTTARGET", "")
-                    .add("__EVENTARGUMENT", "")
-                    .add("__VIEWSTATE", sub[0])
-                    .add("hidLanguage", "")
-                    .add("ddlXN", "")
-                    .add("ddlXQ", "")
-                    .add("ddl_kcxz", "")
+                    .add(CONSTANT.EVENTTARGET, "")
+                    .add(CONSTANT.EVENTARGUMENT, "")
+                    .add(CONSTANT.VIEWSTATE, sub[0])
+                    .add(CONSTANT.HIDELANGUAGE, "")
+                    .add(CONSTANT.XN, "")
+                    .add(CONSTANT.XQ, "")
+                    .add(CONSTANT.XZ, "")
                     .add("Button1", "成绩统计")
                     .build();
             //  }
         } else if (sub[1].equals("") && sub[2].equals("")) { //历年成绩查询
             return new FormBody.Builder()
-                    .add("__EVENTTARGET", "")
-                    .add("__EVENTARGUMENT", "")
-                    .add("__VIEWSTATE", sub[0])
-                    .add("hidLanguage", "")
-                    .add("ddlXN", "")
-                    .add("ddlXQ", "")
-                    .add("ddl_kcxz", "")
+                    .add(CONSTANT.EVENTTARGET, "")
+                    .add(CONSTANT.EVENTARGUMENT, "")
+                    .add(CONSTANT.VIEWSTATE, sub[0])
+                    .add(CONSTANT.HIDELANGUAGE, "")
+                    .add(CONSTANT.XN, "")
+                    .add(CONSTANT.XQ, "")
+                    .add(CONSTANT.XZ, "")
                     //历年成绩
                     .add("btn_zcj", "历年成绩")
                     .build();
         } else { //如果sub[1],sub[2]是空的话，那就是历年成绩查询。否则的就是学期成绩
             return new FormBody.Builder()
-                    .add("__EVENTTARGET", "")
-                    .add("__EVENTARGUMENT", "")
-                    .add("__VIEWSTATE", sub[0])
-                    .add("hidLanguage", "")
-                    .add("ddlXN", sub[1])
-                    .add("ddlXQ", sub[2])
-                    .add("ddl_kcxz", "")
+                    .add(CONSTANT.EVENTTARGET, "")
+                    .add(CONSTANT.EVENTARGUMENT, "")
+                    .add(CONSTANT.VIEWSTATE, sub[0])
+                    .add(CONSTANT.HIDELANGUAGE, "")
+                    .add(CONSTANT.XN, sub[1])
+                    .add(CONSTANT.XQ, sub[2])
+                    .add(CONSTANT.XZ, "")
                     //这里修改了，学期成绩，
                     .add("btn_xq", "学期成绩")
                     .build();
@@ -326,13 +319,14 @@ public class MyOkhttp {
 
     private FormBody buildBodyExam(String viewstate, String[] s) {
         return new FormBody.Builder()
-                .add("__EVENTTARGET", "xnd")
-                .add("__EVENTARGUMENT", "")
-                .add("__VIEWSTATE", viewstate)
+                .add(CONSTANT.EVENTTARGET, "xnd")
+                .add(CONSTANT.EVENTARGUMENT, "")
+                .add(CONSTANT.VIEWSTATE, viewstate)
                 .add("xnd", s[0])
                 .add("xqd", s[1])
                 .build();
     }
+
 
     /**
      * 不带参数的构建

@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import cn.my.forward.R;
 import cn.my.forward.mvp.sourcequery.mvp.utils.DBUtil;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 
@@ -21,7 +22,8 @@ public class AsyncTask extends android.os.AsyncTask<String, Void, Void> {
 
     private Context context;
     private Button mBt;
-    public static  final String URL="insert into bug(content,contact,submitter,bug_no) values(?,?,?,?)";
+    private static final String URL = "insert into bug(content,contact,submitter,bug_no) values" +
+            "(?,?,?,?)";
 
     public AsyncTask(Context applicationContext, Button mBt) {
         this.context = applicationContext;
@@ -31,9 +33,9 @@ public class AsyncTask extends android.os.AsyncTask<String, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mBt.setText("正在提交");
-    }
+        mBt.setText(R.string.submiting);
 
+    }
 
 
     @Override
@@ -68,9 +70,9 @@ public class AsyncTask extends android.os.AsyncTask<String, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        mBt.setText("提交反馈");
+        mBt.setText(R.string.submit);
         super.onPostExecute(aVoid);
-        Toast.makeText(context, "提交成功啦，感谢您提出的宝贵意见", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, R.string.submitsuccess, Toast.LENGTH_SHORT).show();
     }
 
 }

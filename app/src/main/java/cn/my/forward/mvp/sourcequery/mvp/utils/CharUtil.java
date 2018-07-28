@@ -1,11 +1,7 @@
 package cn.my.forward.mvp.sourcequery.mvp.utils;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +73,7 @@ public class CharUtil {
         // 第一个参数负得越大，柱子就会离原点越远（x轴方向），第二个参数如果越大，上面预留的就越多,第三个越大，就越往原点(即左边靠)
         // ，第四个参数越大，就会往Y轴的下面（即Y的负数部分）靠
         Viewport viewport = new Viewport(-0.8f, mColumnChartView.getMaximumViewport().height() *
-                1.25f, 11, 0);
+                1.23f, 11, 0);
         mColumnChartView.setMaximumViewport(viewport);
         Viewport v = new Viewport(mColumnChartView.getMaximumViewport());
        v.left = 0;
@@ -86,25 +82,4 @@ public class CharUtil {
         mColumnChartView.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * 为下面的表格设置数据
-     *
-     * @param context 此处需要的上下文，主要要为application，不然会造成内存泄露
-     * @param person  数据实体类
-     */
-    private static void setDataForTable(Context context, BeanPerson person) {
-        TableRow tr = new TableRow(context);
-        tr.setBackgroundColor(Color.BLACK);
-        for (int i = 0; i < 5; i++) {
-            TextView tv = new TextView(context);
-            tv.setPadding(6, 6, 6, 6);
-            tv.setTextColor(Color.BLACK);
-            tv.setBackgroundColor(Color.WHITE);
-            tv.setText("你是傻逼" + i);
-            tv.setGravity(Gravity.CENTER);
-            tr.addView(tv);
-        }
-
-
-    }
 }

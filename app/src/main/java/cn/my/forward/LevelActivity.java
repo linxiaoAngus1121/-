@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import cn.my.forward.mvp.sourcequery.mvp.adapter.MyRecycleViewAdapterForLevel;
 import cn.my.forward.mvp.sourcequery.mvp.bean.LevelBean;
@@ -41,11 +41,11 @@ public class LevelActivity extends AppCompatActivity implements ILevealView {
 
     //数据展示成功
     @Override
-    public void showLevelData(ArrayList<LevelBean> been) {
+    public void showLevelData(List<LevelBean> been) {
         if (mPb != null) {
             mPb.setVisibility(View.GONE);
         }
-        Toast.makeText(this, "查询成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.query_success, Toast.LENGTH_SHORT).show();
         //适配器
         MyRecycleViewAdapterForLevel adapter = new MyRecycleViewAdapterForLevel(this, been);
         mRv.setAdapter(adapter);

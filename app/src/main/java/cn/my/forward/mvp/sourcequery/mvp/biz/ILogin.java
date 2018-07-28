@@ -18,7 +18,7 @@ public interface ILogin {
 
     void prepareLogin(IGetCodeListtener listener);
 
-    void score(String year, IOnQuerySourceListener querySourceListener);
+    void score(String year, int postion, IOnQuerySourceListener querySourceListener);
 
     void timeTable(int start, ITimeTableListener listener);
 

@@ -66,6 +66,7 @@ public class PersonInformationActivity extends AppCompatActivity implements IPer
         mtv3.setText(person.getMajor());
         mtv5.setText(person.getOrientation());
         mtv5.setSingleLine(true);
+        //让其滚动
         mtv5.setSelected(true);
         mtv5.setFocusable(true);
         mtv5.setFocusableInTouchMode(true);

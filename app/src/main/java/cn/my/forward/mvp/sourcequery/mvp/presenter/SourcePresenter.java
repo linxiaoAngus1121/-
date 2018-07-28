@@ -6,18 +6,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.view.Gravity;
-import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-import cn.my.forward.R;
-import cn.my.forward.customview.MyTextView;
+import cn.my.forward.mvp.sourcequery.mvp.ListForSaveData;
 import cn.my.forward.mvp.sourcequery.mvp.bean.BeanPerson;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_SpareTicket;
 import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
@@ -150,9 +144,24 @@ public class SourcePresenter {
      * 等级考试查询
      */
     public void LevelQuery() {
+        //先判断ListForSaveData中是不是有这个list
+        final List<LevelBean> list = ListForSaveData.getInstance().getLeList();
+        if (null != list) {
+            mhalder.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mLevel != null) {
+                        mLevel.showLevelData(list);
+                    }
+                }
+            });
+            MyLog.i("我头铁在这回去了");
+            return;
+        }
+
         sourceQuery.levelQuery(new ILevelListener() {
             @Override
-            public void showResultSucceed(final ArrayList<LevelBean> been) {
+            public void showResultSucceed(final List<LevelBean> been) {
                 mhalder.post(new Runnable() {
                     @Override
                     public void run() {
@@ -182,6 +191,22 @@ public class SourcePresenter {
      */
     public void person() {
         mPerson.loading();
+
+        final BeanPerson person = ListForSaveData.getInstance().getPerson();
+        if (null != person) {
+            mhalder.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mPerson != null) {
+                        mPerson.showData(person);
+                    }
+                }
+            });
+            MyLog.i("开头就回去了");
+            return;
+        }
+
+
         sourceQuery.personInfomation(new IPersonListener() {
             @Override
             public void onPersonQuerySuccess(final BeanPerson person) {
@@ -372,10 +397,27 @@ public class SourcePresenter {
     /**
      * 查询成绩
      *
-     * @param year 根据的年份
+     * @param year     根据的年份
+     * @param position 位置信息
      */
-    public void scoureQuery(String year) {
-        sourceQuery.score(year, new IOnQuerySourceListener() {
+    public void scoureQuery(String year, int position) {
+        MyLog.i("当前的postion" + position);
+        final ArrayList<String> map = ListForSaveData.getInstance().getMap(position);
+        if (null != map) {
+            mhalder.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (view != null) {
+                        view.showSource(map);
+                        MyLog.i("啦啦啦啦,在内存中返回了数据");
+                    }
+                }
+            });
+            return;
+        }
+
+        MyLog.i("去教务系统查询了数据");
+        sourceQuery.score(year, position, new IOnQuerySourceListener() {
             @Override
             public void OnQuerySuccess(final ArrayList<String> list) {
                 mhalder.post(new Runnable() {
@@ -523,69 +565,4 @@ public class SourcePresenter {
         }
         return path;
     }
-
-
-    /**
-     * 生成历年成绩spinner适配器所需要的数据
-     *
-     * @param context 上下文
-     * @param stuNo   根据学号
-     * @param flag    是否要添加历年成绩几个字，用于区分是历年成绩的还是考试查询的,true则添加，false则不添加
-     */
-    public ArrayAdapter<String> initDataForAdapter(Context context, String stuNo, boolean flag) {
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout
-                .simple_spinner_item, getList(stuNo.substring(0, 2), flag));
-        adapter.setDropDownViewResource(R.layout.activity_exam_sp_dropdown);
-        return adapter;
-    }
-
-
-    /**
-     * 返回历年成绩的头部数据源
-     *
-     * @param stuNo 学号
-     * @param flag  是否要添加历年成绩几个字，用于区分是历年成绩的还是考试查询的,true则添加，false则不添加
-     * @return 返回数据源list
-     */
-    private ArrayList<String> getList(String stuNo, boolean flag) {
-        ArrayList<String> list = new ArrayList<>();
-        if (flag) {
-            list.add("全部成绩");
-        }
-        int j = Integer.valueOf(stuNo) + 2000;    //2015
-        for (int i = j + 2; i >= j; i--) { //2018开始
-            for (int h = 2; h > 0; h--) {
-                String line = String.valueOf(i) + "-" + String.valueOf(i + 1) + "-" + String
-                        .valueOf(h);
-                list.add(line);
-            }
-        }
-        return list;
-    }
-
-    /**
-     * 动态生成头部周几的代码，自定义一个view，圈圈
-     */
-    public void createTextView(Context context, LinearLayout layout) {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams
-                .MATCH_PARENT, 1.0f);
-        Date date = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int i1 = calendar.get(Calendar.DAY_OF_WEEK);    //获取当前是周几
-        for (int i = 1; i <= 6; i++) {
-            MyTextView mTv = new MyTextView(context);
-            if (i == i1 - 1) {
-                mTv.isToday = true;         //自定义view中的属性
-            }
-            mTv.setLayoutParams(lp);
-            mTv.setGravity(Gravity.CENTER);
-            mTv.setText(String.valueOf(i));
-            mTv.setTextSize(18);
-            layout.addView(mTv);
-        }
-    }
-
-
 }

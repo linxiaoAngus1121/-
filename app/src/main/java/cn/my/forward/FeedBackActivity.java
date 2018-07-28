@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
+import cn.my.forward.mvp.sourcequery.mvp.User;
 import cn.my.forward.service.AsyncTask;
 
 /**
@@ -23,7 +23,6 @@ import cn.my.forward.service.AsyncTask;
 public class FeedBackActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText mEt;
     private Button mBt;
-    private Bean_l extra;
     private TextView mTv;   //展示剩余字数的
     private EditText mContactEd;    //联系方式的Editext
     private android.os.AsyncTask<String, Void, Void> task;
@@ -40,7 +39,6 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
         mTv = (TextView) findViewById(R.id.show_sum);
         mContactEd = (EditText) findViewById(R.id.contact);
         mBt.setOnClickListener(this);
-        extra = getIntent().getParcelableExtra("information");
         mEt.addTextChangedListener(new TextWatcher() {  //监听上面字数的变化
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -83,14 +81,14 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
         toclosekeyboard();
         //判断输入的内容是否为空
         if (TextUtils.isEmpty(mEt.getText().toString())) {
-            Toast.makeText(this, "请输入您的意见建议哟", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.advices, Toast.LENGTH_SHORT).show();
             return;
         }
+        User user = User.getInstance();
         //开启一个asyncTask
         task = new AsyncTask(getApplicationContext(), mBt)
-                .execute(mEt.getText().toString(), mContactEd.getText().toString(), extra.getName(),
-                        extra.getStuNo(),
-                        extra.getStuPs());
+                .execute(mEt.getText().toString(), mContactEd.getText().toString(), user.getName
+                        (), user.getStuNo());
     }
 
 
@@ -115,6 +113,5 @@ public class FeedBackActivity extends AppCompatActivity implements View.OnClickL
             task.cancel(true);
         }
         task = null;
-        extra = null;
     }
 }

@@ -104,7 +104,7 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
         if (mpb != null) {
             mpb.setVisibility(View.GONE);
         }
-        Toast.makeText(this, "查询出错啦，换个地址试试", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.ticket_error, Toast.LENGTH_SHORT).show();
 
     }
 
@@ -130,7 +130,7 @@ public class TicketsActivity extends AppCompatActivity implements ITicketsView, 
         switch (v.getId()) {
             case R.id.confirm:
                 if (getFrom().equals("") || getTo().equals("")) {
-                    Toast.makeText(this, "两个地点都要填哟", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.ticket_address, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 presenter.ticket();

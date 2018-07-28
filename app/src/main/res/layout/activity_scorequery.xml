@@ -11,11 +11,6 @@
         android:layout_height="30dp"
         />
 
-    <ProgressBar
-        android:id="@+id/scpure_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
 
     <LinearLayout
         android:id="@+id/title_ll"
@@ -47,15 +42,6 @@
             />
     </LinearLayout>
 
-    <!-- <ListView
-         android:id="@+id/scoure_data_lv"
-         android:layout_width="match_parent"
-         android:layout_height="match_parent"
-         android:layout_below="@id/title_ll"
-         android:layout_margin="10dp"
-         android:divider="@color/colorDarkGreen"
-         android:dividerHeight="1dp"
-         android:scrollbars="none"/>-->
     <android.support.v7.widget.RecyclerView
         android:id="@+id/scoure_data_lv"
         android:layout_width="match_parent"
@@ -64,4 +50,10 @@
         android:layout_margin="10dp"
         android:dividerHeight="1dp"
         android:scrollbars="none"/>
+
+    <ProgressBar
+        android:id="@+id/scpure_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
 </RelativeLayout>

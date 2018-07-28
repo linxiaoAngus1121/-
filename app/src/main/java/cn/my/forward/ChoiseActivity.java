@@ -13,7 +13,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import cn.my.forward.adapter.MyAdapter;
-import cn.my.forward.mvp.sourcequery.mvp.bean.Bean_l;
+import cn.my.forward.mvp.sourcequery.mvp.User;
 import cn.my.forward.mvp.sourcequery.mvp.utils.MyLog;
 import cn.my.forward.service.LoginService;
 
@@ -25,7 +25,6 @@ public class ChoiseActivity extends AppCompatActivity {
     private Intent mIntent;
     private GridView mGridView;
     private long mExitTime;
-    private Bean_l extra;
     private ArrayList<String> mlist; //存放用户进行了那些行为
 
     @Override
@@ -34,49 +33,45 @@ public class ChoiseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_choise);
         mGridView = (GridView) findViewById(R.id.choise_grid);
         TextView tv = (TextView) findViewById(R.id.choise_showName_tv);
-        extra = getIntent().getParcelableExtra("information");
         mlist = new ArrayList<>();
         initAdapter();
-        tv.append(extra.getName());
+        tv.append(User.getInstance().getName());
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String no = extra.getStuNo();
                 MyLog.i("当前的postion" + position);
                 switch (position) {
                     case 0:
                         mIntent = new Intent(ChoiseActivity.this, SourceQueryActivity.class);
-                        mIntent.putExtra("stu_no", no);
-                        mlist.add("成绩查询");
+                        mlist.add(MyAdapter.title[0]);
                         break;
                     case 1:
                         mIntent = new Intent(ChoiseActivity.this, TimeTableActivity.class);
-                        mlist.add("课表查询");
+                        mlist.add(MyAdapter.title[1]);
                         break;
                     case 2:
                         mIntent = new Intent(ChoiseActivity.this, ExamActivity.class);
-                        mlist.add("考试查询");
-                        mIntent.putExtra("stu_no", no);
+                        mlist.add(MyAdapter.title[2]);
                         break;
                     case 3:
                         mIntent = new Intent(ChoiseActivity.this, LevelActivity.class);
-                        mlist.add("等级成绩查询");
+                        mlist.add(MyAdapter.title[3]);
                         break;
                     case 4:
                         mIntent = new Intent(ChoiseActivity.this, PersonInformationActivity.class);
-                        mlist.add("个人信息查询");
+                        mlist.add(MyAdapter.title[4]);
                         break;
                     case 5:     //问卷调查
                         //   mIntent = new Intent(ChoiseActivity.this, QuestionSurveyActivity
                         // .class);
                         mIntent = new Intent(ChoiseActivity.this, TicketsActivity
                                 .class);
-                        mlist.add("火车票查询");
+                        mlist.add(MyAdapter.title[5]);
                         break;
                     case 6:
                         mIntent = new Intent(ChoiseActivity.this, LePaiActivity
                                 .class);
-                        mlist.add("颜值评分");
+                        mlist.add(MyAdapter.title[6]);
                         break;
                     case 7: //退出系统
                         mIntent = new Intent(ChoiseActivity.this, MainActivity.class);
@@ -88,8 +83,7 @@ public class ChoiseActivity extends AppCompatActivity {
                     case 8: //bug反馈
                         mIntent = new Intent(ChoiseActivity.this, FeedBackActivity
                                 .class);
-                        mIntent.putExtra("information", extra);
-                        mlist.add("错误反馈");
+                        mlist.add(MyAdapter.title[8]);
                         break;
                     default:
                         break;
@@ -119,7 +113,6 @@ public class ChoiseActivity extends AppCompatActivity {
 
     private void upload() {
         Intent intentforward = new Intent(this, LoginService.class);
-        intentforward.putExtra("information", extra);
         intentforward.putStringArrayListExtra("list", mlist);
         startService(intentforward);
     }
@@ -136,7 +129,7 @@ public class ChoiseActivity extends AppCompatActivity {
 
     private void exit() {
         if (System.currentTimeMillis() - mExitTime > 2000) {
-            Toast.makeText(ChoiseActivity.this, "再按一次退出教务系统", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ChoiseActivity.this, R.string.exit, Toast.LENGTH_SHORT).show();
             mExitTime = System.currentTimeMillis();
         } else {
             finish();

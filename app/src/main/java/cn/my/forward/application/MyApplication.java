@@ -3,6 +3,7 @@ package cn.my.forward.application;
 import android.app.Application;
 
 import com.baidu.mobstat.StatService;
+import com.squareup.leakcanary.LeakCanary;
 
 
 public class MyApplication extends Application {
@@ -23,13 +24,12 @@ public class MyApplication extends Application {
         // 否则开发者自定义的回调无法收到。
         StatService.autoTrace(this, true, true);
 
-    /*    //  此处使用LeakCanary检测内存泄露，未发现泄露问题
+        //  此处使用LeakCanary检测内存泄露，未发现泄露问题
         if (LeakCanary.isInAnalyzerProcess(this)) {
             return;
         }
         //  refWatcher = LeakCanary.install(this);
         LeakCanary.install(this);
-*/
     }
 
   /*  public static RefWatcher getRefWatcher(Context context) {
